@@ -1,6 +1,6 @@
 // 🦟👀
 // Configurações da API
-const API_BASE_URL = 'http://localhost:3002/api';
+const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
 let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', function() {
