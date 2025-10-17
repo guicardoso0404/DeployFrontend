@@ -1,0 +1,594 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NetworkUp API - Documentação</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@3.52.5/swagger-ui.css" />
+    <link rel="icon" href="../assets/imagens/Logo.png">
+    <style>
+        /* Cores do NetworkUp */
+        :root {
+            --gray: #9CA0A1;
+            --ivory: #D7D4CC;
+            --aquamarine: #A7C0BE;
+            --charcoal: #4D6772;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--charcoal) 0%, #3a5561 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: var(--ivory);
+            overflow-x: hidden;
+        }
+        
+        /* Header com a identidade do NetworkUp */
+        .main-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(167, 192, 190, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            min-height: 80px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            box-shadow: 0 8px 32px rgba(167, 192, 190, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .logo img:hover {
+            transform: scale(1.1);
+        }
+        
+        .logo h1 {
+            color: var(--ivory);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .header-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .header-links a {
+            color: var(--aquamarine);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .header-links a:hover {
+            background: rgba(167, 192, 190, 0.1);
+            color: var(--ivory);
+        }
+        
+        .swagger-ui .topbar {
+            display: none;
+        }
+        
+        /* Container do conteúdo principal */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(167, 192, 190, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Personalização do Swagger UI */
+        .swagger-ui {
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            max-width: 100%;
+            overflow-x: auto;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .swagger-ui .info {
+            margin: 30px 0;
+        }
+        
+        .swagger-ui .info .title {
+            color: #FFFFFF;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+        }
+        
+        .swagger-ui .info .description {
+            color: #FFFFFF;
+            font-size: 16px;
+        }
+        
+        .swagger-ui .opblock-tag {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .swagger-ui .opblock .opblock-summary-method {
+            background: var(--aquamarine);
+            color: #000000;
+            font-weight: 700;
+        }
+        
+        .swagger-ui .opblock {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            margin: 16px 0;
+            word-break: break-word;
+        }
+        
+        .swagger-ui .btn {
+            background: var(--aquamarine);
+            color: #000000;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 600;
+        }
+        
+        .swagger-ui table {
+            table-layout: auto;
+        }
+        
+        .swagger-ui table tbody tr td {
+            color: #FFFFFF;
+        }
+        
+        .swagger-ui .parameters-col_description {
+            width: 100%;
+            color: #FFFFFF;
+        }
+        
+        .swagger-ui .response-col_status {
+            width: auto;
+            min-width: 90px;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        
+        .swagger-ui .wrapper {
+            padding: 0 10px;
+            max-width: 100%;
+        }
+        
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(167, 192, 190, 0.1);
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Menu mobile */
+        .mobile-menu-button {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--ivory);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .header-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .header-links a {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .swagger-ui .opblock .opblock-summary {
+                padding: 8px;
+            }
+            
+            .swagger-ui .opblock-tag {
+                font-size: 18px;
+                padding: 5px 0;
+            }
+            
+            .swagger-ui table tbody tr td {
+                padding: 8px 5px;
+            }
+            
+            .mobile-menu-button {
+                display: block;
+            }
+            
+            .header-links {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .swagger-ui .opblock-summary-method {
+                min-width: 60px;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            
+            .swagger-ui .opblock-summary-path {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header com identidade visual do NetworkUp -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp">
+                <h1>NetworkUp API</h1>
+            </div>
+            
+            <button class="mobile-menu-button" id="mobileMenuButton">☰</button>
+            <nav class="header-links" id="headerLinks">
+                <a href="/">Home</a>
+                <a href="/feed">Feed</a>
+                <a href="/sobre">Sobre</a>
+                <a href="/login">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="swagger-ui"></div>
+    </div>
+
+    <div class="footer">
+        &copy; 2025 NetworkUp - Documentação da API v1.0.0
+    </div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@3.52.5/swagger-ui-bundle.js"></script>
+    <script>
+        window.onload = function() {
+            // Configurar Swagger UI com tema personalizado
+            const ui = SwaggerUIBundle({
+                url: "/swagger.json",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIBundle.SwaggerUIStandalonePreset
+                ],
+                layout: "BaseLayout",
+                defaultModelsExpandDepth: -1,
+                defaultModelExpandDepth: 1,
+                defaultModelRendering: 'model',
+                displayRequestDuration: true,
+                docExpansion: 'list',
+                filter: true,
+                showExtensions: true,
+                tagsSorter: 'alpha',
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+                syntaxHighlight: {
+                    activate: true,
+                    theme: "agate"
+                },
+                responseInterceptor: function(response) {
+                    if (response.status >= 400) {
+                        console.error('API request failed', response);
+                    }
+                    return response;
+                },
+                onComplete: function() {
+                    // Personalização adicional após carregar
+                    applyCustomStyles();
+                }
+            });
+            
+            // Implementar menu móvel
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const headerLinks = document.getElementById('headerLinks');
+            
+            if (mobileMenuButton && headerLinks) {
+                mobileMenuButton.addEventListener('click', function() {
+                    if (headerLinks.style.display === 'flex') {
+                        headerLinks.style.display = 'none';
+                    } else {
+                        headerLinks.style.display = 'flex';
+                    }
+                });
+                
+                // Verificar o tamanho da tela para configuração inicial
+                checkScreenSize();
+                
+                // Ajustar quando o tamanho da janela mudar
+                window.addEventListener('resize', checkScreenSize);
+                
+                function checkScreenSize() {
+                    if (window.innerWidth >= 768) {
+                        headerLinks.style.display = 'flex';
+                        mobileMenuButton.style.display = 'none';
+                    } else {
+                        headerLinks.style.display = 'none';
+                        mobileMenuButton.style.display = 'block';
+                    }
+                }
+            }
+            
+            // Função para aplicar estilos personalizados adicionais após o carregamento
+            function applyCustomStyles() {
+                // Ajustar cores de alguns elementos do Swagger UI para combinar com o tema
+                const styleOverrides = document.createElement('style');
+                styleOverrides.textContent = `
+                    /* Melhorar legibilidade de texto */
+                    .swagger-ui, .swagger-ui .info p, .swagger-ui .markdown p, .swagger-ui .markdown pre, 
+                    .swagger-ui .opblock-description-wrapper p, .swagger-ui .opblock-external-docs-wrapper p, 
+                    .swagger-ui .opblock-title_normal p, .swagger-ui .response-col_description__inner p {
+                        color: #FFFFFF !important;
+                        font-weight: 500;
+                        font-size: 16px;
+                    }
+                    
+                    /* Base path e informações da API */
+                    .swagger-ui .info .base-url, .swagger-ui .info a, .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+                        color: #FFFFFF !important;
+                        font-weight: 500;
+                        font-size: 16px;
+                    }
+                    
+                    /* Melhorar ainda mais a legibilidade */
+                    .swagger-ui select {
+                        color: #FFFFFF !important;
+                        background-color: rgba(0, 0, 0, 0.3) !important;
+                        border: 1px solid rgba(167, 192, 190, 0.5) !important;
+                    }
+                    
+                    .swagger-ui .renderedMarkdown * {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    .swagger-ui .scheme-container {
+                        background-color: rgba(0, 0, 0, 0.2) !important;
+                    }
+                    
+                    .swagger-ui .servers-title, 
+                    .swagger-ui .schemes-title, 
+                    .swagger-ui .servers label, 
+                    .swagger-ui div.table-container {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    /* Links */
+                    .swagger-ui a {
+                        color: #A7C0BE !important;
+                        font-weight: 600;
+                    }
+                    
+                    .swagger-ui .opblock-tag {
+                        color: #FFFFFF !important;
+                        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        font-weight: 700;
+                        border-bottom: 1px solid rgba(167, 192, 190, 0.5);
+                    }
+                    
+                    /* Títulos dos endpoints */
+                    .swagger-ui .opblock-summary-operation-id, 
+                    .swagger-ui .opblock-summary-path,
+                    .swagger-ui .opblock-summary-path__deprecated {
+                        color: #FFFFFF !important;
+                        font-weight: 600;
+                    }
+                    
+                    /* Descrições dos endpoints */
+                    .swagger-ui .opblock-summary-description {
+                        color: #FFFFFF !important;
+                        font-weight: 400;
+                    }
+                    
+                    /* Método HTTP (GET, POST, etc) */
+                    .swagger-ui .opblock .opblock-summary-method {
+                        background: #A7C0BE;
+                        color: #000000;
+                        font-weight: 700;
+                    }
+                    
+                    /* Cabeçalhos de tabelas */
+                    .swagger-ui table thead tr td, 
+                    .swagger-ui table thead tr th {
+                        color: #FFFFFF !important;
+                        font-weight: 600;
+                    }
+                    
+                    /* Corpo da tabela */
+                    .swagger-ui table tbody tr td {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    /* Parâmetros */
+                    .swagger-ui .parameter__name {
+                        color: #A7C0BE !important;
+                        font-weight: 600;
+                    }
+                    
+                    .swagger-ui .parameter__type, 
+                    .swagger-ui .parameter__deprecated, 
+                    .swagger-ui .parameter__in {
+                        color: #FFFFFF !important;
+                        font-weight: 400;
+                    }
+                    
+                    .swagger-ui .parameter__enum {
+                        color: #D7D4CC !important;
+                    }
+                    
+                    /* Títulos de modelos */
+                    .swagger-ui .model-title {
+                        color: #FFFFFF !important;
+                        font-weight: 600;
+                    }
+                    
+                    /* Propriedades dos modelos */
+                    .swagger-ui .property-name {
+                        color: #A7C0BE !important;
+                        font-weight: 600;
+                    }
+                    
+                    .swagger-ui .property-type {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    /* Caixas de texto e inputs */
+                    .swagger-ui input[type=text], .swagger-ui textarea {
+                        background: rgba(255, 255, 255, 0.15);
+                        border: 1px solid rgba(167, 192, 190, 0.5);
+                        color: #FFFFFF;
+                        font-size: 14px;
+                    }
+                    
+                    /* Também melhorar legibilidade dos labels */
+                    .swagger-ui label {
+                        color: #FFFFFF !important;
+                        font-size: 14px;
+                        font-weight: 500;
+                    }
+                    
+                    .swagger-ui input[type=text]:focus, .swagger-ui textarea:focus {
+                        border: 1px solid #A7C0BE;
+                        box-shadow: 0 0 0 2px rgba(167, 192, 190, 0.3);
+                    }
+                    
+                    /* Botões */
+                    .swagger-ui .btn {
+                        background-color: #A7C0BE;
+                        color: #000000;
+                        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        font-weight: 600;
+                    }
+                    
+                    /* Seção de cabeçalho dos blocos */
+                    .swagger-ui .opblock .opblock-section-header {
+                        background: rgba(167, 192, 190, 0.2);
+                        color: #FFFFFF;
+                    }
+                    
+                    /* Seção de modelos */
+                    .swagger-ui section.models {
+                        border: 1px solid rgba(167, 192, 190, 0.5);
+                        background: rgba(0, 0, 0, 0.2);
+                    }
+                    
+                    .swagger-ui section.models.is-open h4 {
+                        border-bottom: 1px solid rgba(167, 192, 190, 0.5);
+                        color: #FFFFFF !important;
+                        font-size: 18px;
+                    }
+                    
+                    .swagger-ui section.models h4 {
+                        color: #FFFFFF !important;
+                        font-weight: 600;
+                    }
+                    
+                    .swagger-ui .models-control {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    .swagger-ui .model {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    /* Status de respostas */
+                    .swagger-ui .responses-table .response-col_status {
+                        color: #FFFFFF !important;
+                        font-weight: 600;
+                    }
+                    
+                    /* Bloco de código */
+                    .swagger-ui .microlight {
+                        color: #FFFFFF !important;
+                        background: rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Schemas */
+                    .swagger-ui .prop-type {
+                        color: #A7C0BE !important;
+                    }
+                    
+                    .swagger-ui .prop-format {
+                        color: #D7D4CC !important;
+                    }
+                    
+                    /* Modelos */
+                    .swagger-ui .model-box {
+                        background: rgba(0, 0, 0, 0.2) !important;
+                    }
+                    
+                    .swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus {
+                        outline: none;
+                    }
+                `;
+                document.head.appendChild(styleOverrides);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - NetworkUp</title>
+    <link rel="stylesheet" href="../css/login.css">
+    <link rel="icon" href="../assets/imagens/Logo.png">
+    <meta name="description" content="Login - NetworkUp - Conectando microempresas de tecnologia do RS">
+    <meta name="keywords" content="login, networking, tecnologia, microempresas, RS">
+    <meta name="author" content="Guilherme Cardoso">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="logo">
+                    <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp">
+                    <h1>NetworkUp</h1>
+                </div>
+                <div class="brand-description">
+                    <h2>Conecte-se com profissionais de tecnologia</h2>
+                    <p>Uma plataforma exclusiva para microempresas de tecnologia do RS compartilharem conhecimento, oportunidades e construírem networking estratégico.</p>
+                    <div class="features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🚀</div>
+                            <span>Acelere seu networking</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💡</div>
+                            <span>Compartilhe conhecimento</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🤝</div>
+                            <span>Encontre parceiros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="login-right">
+            <div class="login-form-container">
+                <div class="login-header">
+                    <h2>Bem-vindo de volta!</h2>
+                    <p>Faça login para acessar sua conta</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                            <div class="input-icon">📧</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="senha">Senha</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+                            <div class="input-icon">🔒</div>
+                            <button type="button" class="toggle-password" aria-label="Mostrar/Ocultar senha">👁️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span class="checkmark"></span>
+                            Lembrar de mim
+                        </label>
+                        <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Entrar</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                    
+                    <!-- <div class="form-divider">
+                        <span>ou</span>
+                    </div>
+                    
+                    <div class="social-login">
+                        <button type="button" class="btn btn-social btn-google">
+                            <span class="social-icon">G</span>
+                            Continuar com Google
+                        </button>
+                        <button type="button" class="btn btn-social btn-linkedin">
+                            <span class="social-icon">in</span>
+                            Continuar com LinkedIn
+                        </button>
+                    </div> -->
+                </form>
+                
+                <div class="login-footer">
+                    <p>Ainda não tem uma conta? <a href="/cadastro" class="signup-link">Cadastre-se</a></p>
+                    <div class="back-links">
+                        <a href="/home" class="back-link">← Voltar ao início</a>
+                        <a href="/feed" class="guest-link">Entrar como visitante</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script src="../js/login.js"></script>
+</body>
+</html>
+
+<!--  -->

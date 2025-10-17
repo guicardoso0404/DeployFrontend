@@ -1,0 +1,115 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - NetworkUp</title>
+    <link rel="stylesheet" href="../css/feed.css">
+    <link rel="icon" href="../assets/imagens/Logo.png">
+    <meta name="description" content="Feed - NetworkUp - Conectando microempresas de tecnologia do RS">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp">
+                <h1>NetworkUp</h1>
+            </div>
+            
+            <!-- Área do usuário logado ou visitante -->
+            <div class="user-area">
+                <!-- Para usuários logados -->
+                <div id="loggedUserArea" class="logged-user-area" style="display: none;">
+                    <div class="user-info-header">
+                        <div class="user-avatar-small">
+                            <img id="headerUserAvatar" src="../assets/imagens/Logo.png" alt="Avatar">
+                        </div>
+                        <div class="user-details">
+                            <span id="headerUserName">Usuário</span>
+                            <span id="headerUserEmail">email@empresa.com</span>
+                        </div>
+                    </div>
+                    <nav class="user-nav">
+                        <button id="chatBtn" class="nav-btn">💬 Chat</button>
+                        <button id="profileBtn" class="nav-btn">👤 Perfil</button>
+                        <button id="logoutBtn" class="nav-btn logout">🚪 Sair</button>
+                    </nav>
+                </div>
+                
+                <!-- Para visitantes -->
+                <div id="guestUserArea" class="guest-user-area">
+                    <p class="welcome-text">Bem-vindo ao NetworkUp!</p>
+                    <div class="guest-actions">
+                        <a href="/login" class="btn btn-primary">Fazer Login</a>
+                        <a href="/cadastro" class="btn btn-secondary">Criar Conta</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Seção para criar nova postagem (apenas usuários logados) -->
+            <section class="create-post-section" id="createPostSection" style="display: none;">
+                <div class="create-post-card">
+                    <h2>O que você está pensando?</h2>
+                    <form id="createPostForm" class="create-post-form">
+                        <textarea 
+                            id="postContent" 
+                            name="content" 
+                            placeholder="Compartilhe suas ideias com a comunidade..." 
+                            rows="3"
+                            maxlength="500"
+                        ></textarea>
+                        
+                        <!-- Área para anexar fotos -->
+                        <div class="photo-upload-section">
+                            <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
+                            <button type="button" class="photo-btn" onclick="document.getElementById('photoInput').click()">
+                                📷 Adicionar Foto
+                            </button>
+                            <div id="photoPreview" class="photo-preview" style="display: none;">
+                                <img id="previewImage" src="" alt="Preview">
+                                <button type="button" class="remove-photo" onclick="removePhoto()">❌</button>
+                            </div>
+                        </div>
+                        
+                        <div class="post-actions">
+                            <span class="character-count">0/500</span>
+                            <button type="submit" class="btn btn-primary">Publicar</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Seção para visitantes não logados -->
+            <section class="guest-message-section" id="guestMessageSection" style="display: none;">
+                <div class="create-post-card">
+                    <h2>Bem-vindo ao NetworkUp!</h2>
+                    <p>Você está navegando como visitante. Para criar postagens e interagir com a comunidade:</p>
+                    <div class="guest-actions">
+                        <a href="/login" class="btn btn-primary">Fazer Login</a>
+                        <a href="/cadastro" class="btn btn-secondary">Criar Conta</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feed de postagens -->
+            <section class="feed-section">
+                <div id="postsContainer" class="posts-container">
+                    <!-- Postagens serão carregadas aqui via JavaScript -->
+                    <div class="loading">
+                        <p>Carregando postagens...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="../js/feed.js"></script>
+</body>
+</html>
+
+<!--  -->

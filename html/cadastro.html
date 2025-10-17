@@ -1,0 +1,156 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Ne                <div class="cadastro-footer">
+                    <p>Já tem uma conta? <a href="/login" class="login-link">Faça login</a></p>
+                    <div class="back-links">
+                        <a href="/home" class="back-link">← Voltar ao início</a>
+                        <a href="/feed" class="back-link">Entrar como visitante</a>
+                    </div>
+                </div></title>
+    <link rel="stylesheet" href="../css/cadastro.css">
+    <link rel="icon" href="../assets/imagens/Logo.png">
+    <meta name="description" content="Cadastro - NetworkUp - Conectando microempresas de tecnologia do RS">
+    <meta name="keywords" content="cadastro, networking, tecnologia, microempresas, RS">
+    <meta name="author" content="Guilherme Cardoso">
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-left">
+            <div class="info-section">
+                <div class="logo">
+                    <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp">
+                    <h1>NetworkUp</h1>
+                </div>
+                <div class="info-content">
+                    <h2>Junte-se à comunidade</h2>
+                    <p>Cadastre-se e faça parte da maior rede de profissionais de tecnologia do RS.</p>
+                    <div class="benefits-list">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">🚀</div>
+                            <div class="benefit-content">
+                                <h4>Oportunidades</h4>
+                                <p>Acesse vagas e projetos exclusivos</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">💡</div>
+                            <div class="benefit-content">
+                                <h4>Conhecimento</h4>
+                                <p>Compartilhe e aprenda com especialistas</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">🤝</div>
+                            <div class="benefit-content">
+                                <h4>Networking</h4>
+                                <p>Construa conexões profissionais sólidas</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">📈</div>
+                            <div class="benefit-content">
+                                <h4>Crescimento</h4>
+                                <p>Acelere sua carreira na tecnologia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="register-right">
+            <div class="register-form-container">
+                <div class="register-header">
+                    <h2>Crie sua conta</h2>
+                    <p>Preencha os dados abaixo para se cadastrar</p>
+                </div>
+                
+                <form id="registerForm" class="register-form">
+                    <div class="form-group full-width">
+                        <label for="nome">Nome completo</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
+                            <div class="input-icon">👤</div>
+                        </div>
+                        <div class="error-message">Nome é obrigatório</div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="email">E-mail</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                            <div class="input-icon">📧</div>
+                        </div>
+                        <div class="error-message">E-mail válido é obrigatório</div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="senha">Senha</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="senha" name="senha" placeholder="Mínimo 6 caracteres" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('senha')">👁️</button>
+                        </div>
+                        <div class="error-message">Senha deve ter pelo menos 6 caracteres</div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="confirmSenha">Confirmar senha</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="confirmSenha" name="confirmSenha" placeholder="Confirme sua senha" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmSenha')">👁️</button>
+                        </div>
+                        <div class="error-message">As senhas não coincidem</div>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <span>
+                                Concordo com os <a href="#" class="terms-link">Termos de Uso</a> 
+                                e <a href="#" class="terms-link">Política de Privacidade</a>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Criar conta</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                    
+                    <!-- <div class="form-divider">
+                        <span>ou</span>
+                    </div>
+                    
+                    <div class="social-login">
+                        <button type="button" class="btn btn-social btn-google">
+                            <span class="social-icon">G</span>
+                            Cadastrar com Google
+                        </button>
+                        <button type="button" class="btn btn-social btn-linkedin">
+                            <span class="social-icon">in</span>
+                            Cadastrar com LinkedIn
+                        </button>
+                    </div> -->
+                </form>
+                
+                <div class="register-footer">
+                    <p>Já tem uma conta? <a href="login.html" class="login-link">Faça login</a></p>
+                    <div class="back-links">
+                        <a href="home.html" class="back-link">← Voltar ao início</a>
+                        <a href="feed.html" class="back-link">Entrar como visitante</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script src="../js/cadastro.js"></script>
+</body>
+</html>
+<!--  -->

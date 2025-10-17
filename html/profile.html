@@ -1,0 +1,213 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - NetworkUp</title>
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="icon" href="assets/imagens/Logo.png">
+    <meta name="description" content="Meu Perfil - NetworkUp">
+    <meta name="author" content="Guilherme Cardoso">
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Header -->
+        <header class="profile-header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/imagens/Logo.png" alt="Logo NetworkUp">
+                    <h1>NetworkUp</h1>
+                </div>
+                <nav class="profile-nav">
+                    <a href="/feed" class="nav-link">Feed</a>
+                    <a href="/profile" class="nav-link active">Meu Perfil</a>
+                    <button id="logoutBtn" class="nav-link logout-btn">Sair</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="profile-content">
+            <!-- Profile Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="profile-card">
+                    <div class="profile-avatar-container">
+                        <img src="../assets/imagens/Logo.png" alt="Foto do Perfil" class="profile-avatar" id="profileAvatar">
+                        <button class="change-avatar-btn" onclick="changeProfilePhoto()">
+                            📷
+                        </button>
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profileName">Nome da Empresa</h2>
+                        <p id="profileEmail">empresa@email.com</p>
+                        <p id="profileDescription">Descrição da empresa...</p>
+                        
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="postsCount">0</span>
+                                <span class="stat-label">Posts</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="likesCount">0</span>
+                                <span class="stat-label">Curtidas</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="commentsCount">0</span>
+                                <span class="stat-label">Comentários</span>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="editProfile()">
+                                ✏️ Editar Perfil
+                            </button>
+                            <button class="btn btn-danger" onclick="logout()">
+                                🚪 Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quick-links">
+                    <h3>Links Rápidos</h3>
+                    <div class="links-list">
+                        <a href="/feed" class="link-item">
+                            <span class="link-icon">🏠</span>
+                            Feed Principal
+                        </a>
+                        <a href="/sobre" class="link-item">
+                            <span class="link-icon">ℹ️</span>
+                            Sobre
+                        </a>
+                        <a href="/home" class="link-item">
+                            <span class="link-icon">🔗</span>
+                            Página Inicial
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Profile Area -->
+            <div class="profile-main">
+                <div class="profile-tabs">
+                    <button class="tab-button active" onclick="showTab('posts')">
+                        📝 Meus Posts
+                    </button>
+                    <button class="tab-button" onclick="showTab('about')">
+                        👤 Sobre
+                    </button>
+                </div>
+
+                <!-- Posts Tab -->
+                <div id="posts" class="tab-content active">
+                    <div class="posts-grid" id="userPosts">
+                        <!-- Posts serão carregados aqui -->
+                    </div>
+                </div>
+
+                <!-- About Tab -->
+                <div id="about" class="tab-content">
+                    <div class="about-content">
+                        <div class="info-card">
+                            <h4>Informações da Empresa</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Nome da Empresa</span>
+                                    <span class="info-value" id="aboutName">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value" id="aboutEmail">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Cadastrada desde</span>
+                                    <span class="info-value" id="memberSince">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Último acesso</span>
+                                    <span class="info-value" id="lastAccess">Agora</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4>Sobre a Empresa</h4>
+                            <div class="company-description">
+                                <p id="companyDescription">Descrição da empresa será exibida aqui...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4>Estatísticas</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Total de Posts</span>
+                                    <span class="info-value" id="totalPosts">0</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Total de Curtidas Recebidas</span>
+                                    <span class="info-value" id="totalLikes">0</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Total de Comentários</span>
+                                    <span class="info-value" id="totalComments">0</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Post Mais Curtido</span>
+                                    <span class="info-value" id="mostLikedPost">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditProfile()">&times;</span>
+            <h3>Editar Perfil</h3>
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editName">Nome da Empresa:</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Descrição da Empresa:</label>
+                    <textarea id="editDescription" name="description" rows="4" placeholder="Conte sobre sua empresa, serviços, missão..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editPassword">Nova Senha (deixe em branco para manter atual):</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="editPassword" name="password" placeholder="Digite nova senha">
+                        <button type="button" class="toggle-password" onclick="toggleModalPassword('editPassword')">👁️</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editConfirmPassword">Confirmar Nova Senha:</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="editConfirmPassword" name="confirmPassword" placeholder="Confirme a nova senha">
+                        <button type="button" class="toggle-password" onclick="toggleModalPassword('editConfirmPassword')">👁️</button>
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditProfile()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
+<!--  -->

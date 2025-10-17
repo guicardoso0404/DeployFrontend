@@ -1,0 +1,169 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - NetworkUp</title>
+    <link rel="stylesheet" href="../css/chat.css">
+    <link rel="icon" href="../assets/imagens/Logo.png">
+    <meta name="description" content="Chat - NetworkUp - Conectando microempresas de tecnologia do RS">
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp">
+                <h1>NetworkUp</h1>
+            </div>
+            
+            <!-- Área do usuário logado ou visitante -->
+            <div class="user-area">
+                <!-- Para usuários logados -->
+                <div id="loggedUserArea" class="logged-user-area" style="display: none;">
+                    <div class="user-info-header">
+                        <div class="user-avatar-small">
+                            <img id="headerUserAvatar" src="../assets/imagens/Logo.png" alt="Avatar">
+                        </div>
+                        <div class="user-details">
+                            <span id="headerUserName">Usuário</span>
+                            <span id="headerUserEmail">email@empresa.com</span>
+                        </div>
+                    </div>
+                    <nav class="user-nav">
+                        <button id="feedBtn" class="nav-btn">📰 Feed</button>
+                        <button id="profileBtn" class="nav-btn">👤 Perfil</button>
+                        <button id="logoutBtn" class="nav-btn logout">🚪 Sair</button>
+                    </nav>
+                </div>
+                
+                <!-- Para visitantes -->
+                <div id="guestUserArea" class="guest-user-area">
+                    <p class="welcome-text">Bem-vindo ao NetworkUp!</p>
+                    <div class="guest-actions">
+                        <a href="/login" class="btn btn-primary">Fazer Login</a>
+                        <a href="/cadastro" class="btn btn-secondary">Criar Conta</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="chat-container">
+        <!-- Área para usuários não logados -->
+        <div id="guestMessageSection" class="guest-message-section">
+            <div class="chat-card">
+                <h2>Acesso restrito</h2>
+                <p>É necessário fazer login para acessar o chat.</p>
+                <div class="guest-actions">
+                    <a href="/login" class="btn btn-primary">Fazer Login</a>
+                    <a href="/cadastro" class="btn btn-secondary">Criar Conta</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área para usuários logados -->
+        <div id="chatInterface" class="chat-interface" style="display: none;">
+            <!-- Lista de conversas (sidebar) -->
+            <aside class="conversations-sidebar">
+                <div class="conversations-header">
+                    <h2>Conversas</h2>
+                    <button id="newChatBtn" class="new-chat-btn" title="Nova conversa">+</button>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" id="searchConversation" placeholder="Buscar conversa...">
+                </div>
+                
+                <div id="conversationsList" class="conversations-list">
+                    <!-- As conversas serão carregadas aqui via JS -->
+                    <div class="loading-msg">Carregando conversas...</div>
+                </div>
+            </aside>
+            
+            <!-- Área de chat -->
+            <section class="chat-area">
+                <!-- Estado inicial -->
+                <div id="emptyChatState" class="empty-chat-state">
+                    <div class="empty-chat-content">
+                        <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp" class="empty-logo">
+                        <h3>NetworkUp Chat</h3>
+                        <p>Selecione uma conversa ou inicie uma nova para começar a conversar.</p>
+                        <button id="startChatBtn" class="btn btn-primary">Nova Conversa</button>
+                    </div>
+                </div>
+                
+                <!-- Conversa ativa -->
+                <div id="activeChatState" class="active-chat-state" style="display: none;">
+                    <!-- Cabeçalho da conversa -->
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <div id="chatUserAvatar" class="user-avatar">
+                                <img src="../assets/imagens/Logo.png" alt="Avatar">
+                            </div>
+                            <div class="chat-user-details">
+                                <h3 id="chatUserName">Nome do Usuário</h3>
+                                <span id="chatUserStatus" class="status-indicator">Online</span>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <div class="dropdown">
+                                <button id="chatOptionsBtn" class="action-btn" title="Opções">⋮</button>
+                                <div id="chatDropdownMenu" class="dropdown-menu">
+                                    <a href="#" id="viewProfileBtn" class="dropdown-item">Ver perfil</a>
+                                    <a href="#" id="blockUserBtn" class="dropdown-item">Bloquear usuário</a>
+                                    <a href="#" id="reportBtn" class="dropdown-item">Reportar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mensagens -->
+                    <div id="messagesContainer" class="messages-container">
+                        <!-- As mensagens serão carregadas aqui via JS -->
+                    </div>
+                    
+                    <!-- Área de digitação -->
+                    <div class="message-input-area">
+                        <form id="messageForm">
+                            <div class="message-input-container">
+                                <input type="text" id="messageInput" placeholder="Digite sua mensagem...">
+                                <button type="submit" class="send-btn" title="Enviar mensagem">
+                                    <span class="send-icon">➤</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Modal para nova conversa -->
+    <div id="newChatModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nova Conversa</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-user">
+                    <input type="text" id="searchUser" placeholder="Buscar usuário...">
+                </div>
+                <div id="userSearchResults" class="user-search-results">
+                    <!-- Resultados serão exibidos aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="../js/chat.js"></script>
+</body>
+</html>
+<!--  -->

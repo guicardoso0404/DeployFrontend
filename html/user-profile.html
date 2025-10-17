@@ -1,0 +1,96 @@
+<!-- 🦟👀 -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - NetworkUp</title>
+    <link rel="stylesheet" href="../css/user-profile.css">
+    <link rel="icon" href="../assets/imagens/Logo.png">
+    <meta name="description" content="Perfil de Usuário - NetworkUp">
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="../assets/imagens/Logo.png" alt="Logo NetworkUp">
+                <h1>NetworkUp</h1>
+            </div>
+            
+            <nav class="header-nav">
+                <a href="/feed" class="nav-link">← Voltar ao Feed</a>
+                <a href="/home" class="nav-link">Início</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Profile Header -->
+            <section class="profile-header">
+                <div class="profile-banner">
+                    <div class="profile-info">
+                        <div class="profile-avatar">
+                            <img id="userAvatar" src="../assets/imagens/Logo.png" alt="Avatar do usuário">
+                        </div>
+                        <div class="profile-details">
+                            <h1 id="userName">Carregando...</h1>
+                            <p id="userEmail">Carregando...</p>
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <span class="stat-number" id="postsCount">0</span>
+                                    <span class="stat-label">Posts</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number" id="memberSince">-</span>
+                                    <span class="stat-label">Membro desde</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Description 1-->
+            <section class="profile-description">
+                <div class="description-card">
+                    <h2>Sobre</h2>
+                    <p id="userDescription">Carregando descrição...</p>
+                </div>
+            </section>
+
+            <!-- User Posts -->
+            <section class="user-posts">
+                <div class="posts-header">
+                    <h2>Posts de <span id="userNamePosts">Usuário</span></h2>
+                    <div class="posts-filter">
+                        <button class="filter-btn active" data-filter="all">Todos</button>
+                        <button class="filter-btn" data-filter="recent">Recentes</button>
+                    </div>
+                </div>
+                
+                <div class="posts-container" id="userPostsContainer">
+                    <div class="loading">
+                        <p>Carregando posts...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="loading-modal" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Carregando perfil...</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../js/user-profile.js"></script>
+</body>
+</html>
