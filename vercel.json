@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/", "dest": "/html/home.html" },
+    { "src": "/cadastro", "dest": "/html/cadastro.html" },
+    { "src": "/login", "dest": "/html/login.html" },
+    { "src": "/feed", "dest": "/html/feed.html" },
+    { "src": "/profile", "dest": "/html/profile.html" },
+    { "src": "/user-profile", "dest": "/html/user-profile.html" },
+    { "src": "/sobre", "dest": "/html/sobre.html" },
+    { "src": "/chat", "dest": "/html/chat.html" },
+    { "src": "/(.*)", "dest": "/html/home.html" }
+  ]
+}
