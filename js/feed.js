@@ -4,15 +4,15 @@ const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
 let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔄 Feed carregando...');
+    console.log(' Feed carregando...');
     
     // Verificar se usuário está logado (opcional)
     currentUser = getCurrentUser();
     
     if (currentUser) {
-        console.log('✅ Usuário logado detectado:', currentUser.nome, currentUser.email);
+        console.log(' Usuário logado detectado:', currentUser.nome, currentUser.email);
     } else {
-        console.log('ℹ️ Usuário não logado - modo visitante');
+        console.log('Usuário não logado - modo visitante');
     }
     
     // Configurar interface
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Carregar feed
     loadFeed();
     
-    console.log('✅ Feed inicializado!');
+    console.log(' Feed inicializado!');
 });
 
 // Configurar interface do usuário
@@ -36,7 +36,7 @@ function setupUserInterface() {
     const guestMessageSection = document.getElementById('guestMessageSection');
     
     if (currentUser) {
-        console.log('🔧 Configurando interface para usuário logado:', currentUser.nome);
+        console.log(' Configurando interface para usuário logado:', currentUser.nome);
         
         // Mostrar área do usuário logado
         if (loggedUserArea) loggedUserArea.style.display = 'block';
@@ -63,7 +63,7 @@ function setupUserInterface() {
         if (createPostSection) createPostSection.style.display = 'block';
         if (guestMessageSection) guestMessageSection.style.display = 'none';
     } else {
-        console.log('🔧 Configurando interface para visitante');
+        console.log(' Configurando interface para visitante');
         
         // Mostrar área do visitante
         if (loggedUserArea) loggedUserArea.style.display = 'none';
@@ -104,7 +104,7 @@ function setupUserMenu() {
     // Configurar botão de perfil
     if (profileBtn) {
         profileBtn.addEventListener('click', function() {
-            console.log('📱 Redirecionando para perfil...');
+            console.log(' Redirecionando para perfil...');
             window.location.href = '/profile';
         });
     }
@@ -113,7 +113,7 @@ function setupUserMenu() {
     const chatBtn = document.getElementById('chatBtn');
     if (chatBtn) {
         chatBtn.addEventListener('click', function() {
-            console.log('💬 Redirecionando para chat...');
+            console.log(' Redirecionando para chat...');
             window.location.href = '/chat';
         });
     }
@@ -121,7 +121,7 @@ function setupUserMenu() {
     // Configurar botão de logout
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
-            console.log('� Fazendo logout...');
+            console.log(' Fazendo logout...');
             
             // Limpar dados do usuário
             localStorage.removeItem('currentUser');
@@ -175,7 +175,7 @@ async function handleCreatePost(event) {
     setButtonLoading(submitButton, true);
     
     try {
-        console.log('📝 Criando postagem...');
+        console.log(' Criando postagem...');
         
         // Preparar FormData para envio de arquivo
         const formData = new FormData();
@@ -194,18 +194,18 @@ async function handleCreatePost(event) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Postagem criada:', data.data.id);
+            console.log(' Postagem criada:', data.data.id);
             showToast('Postagem criada com sucesso!', 'success');
             form.reset();
             removePhoto(); // Limpar preview da foto
             updateCharacterCount();
             loadFeed(); // Recarregar feed
         } else {
-            console.log('❌ Erro ao criar postagem:', data.message);
+            console.log(' Erro ao criar postagem:', data.message);
             showToast(data.message || 'Erro ao criar postagem', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao criar postagem:', error);
+        console.error(' Erro ao criar postagem:', error);
         showToast('Erro de conexão. Verifique se o servidor está rodando.', 'error');
     } finally {
         setButtonLoading(submitButton, false);
@@ -221,20 +221,20 @@ async function loadFeed() {
     postsContainer.innerHTML = '<div class="loading"><p>Carregando postagens...</p></div>';
     
     try {
-        console.log('📰 Carregando feed...');
+        console.log(' Carregando feed...');
         
         const response = await fetch(`${API_BASE_URL}/posts/feed`);
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Feed carregado:', data.data.length, 'postagens');
+            console.log(' Feed carregado:', data.data.length, 'postagens');
             renderPosts(data.data);
         } else {
-            console.log('❌ Erro ao carregar feed:', data.message);
+            console.log(' Erro ao carregar feed:', data.message);
             postsContainer.innerHTML = '<div class="loading"><p>Erro ao carregar postagens</p></div>';
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar feed:', error);
+        console.error('Erro ao carregar feed:', error);
         postsContainer.innerHTML = '<div class="loading"><p>Erro de conexão</p></div>';
     }
 }
@@ -351,7 +351,7 @@ async function toggleLike(postId) {
     }
     
     try {
-        console.log('❤️ Curtindo postagem:', postId);
+        console.log(' Curtindo postagem:', postId);
         
         const response = await fetch(`${API_BASE_URL}/posts/curtir`, {
             method: 'POST',
@@ -367,7 +367,7 @@ async function toggleLike(postId) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Curtida:', data.data.acao);
+            console.log(' Curtida:', data.data.acao);
             
             // Atualizar interface
             const likeBtn = document.querySelector(`[data-post-id="${postId}"] .like-btn`);
@@ -381,11 +381,11 @@ async function toggleLike(postId) {
             
             likeCount.textContent = data.data.total_curtidas;
         } else {
-            console.log('❌ Erro ao curtir:', data.message);
+            console.log(' Erro ao curtir:', data.message);
             showToast(data.message || 'Erro ao curtir postagem', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao curtir postagem:', error);
+        console.error(' Erro ao curtir postagem:', error);
         showToast('Erro de conexão', 'error');
     }
 }
@@ -417,7 +417,7 @@ async function handleAddComment(event, postId) {
     }
     
     try {
-        console.log('💬 Adicionando comentário na postagem:', postId);
+        console.log(' Adicionando comentário na postagem:', postId);
         
         const response = await fetch(`${API_BASE_URL}/posts/comentar`, {
             method: 'POST',
@@ -434,16 +434,16 @@ async function handleAddComment(event, postId) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Comentário adicionado:', data.data.id);
+            console.log(' Comentário adicionado:', data.data.id);
             form.reset();
             loadFeed(); // Recarregar feed para mostrar novo comentário
             showToast('Comentário adicionado!', 'success');
         } else {
-            console.log('❌ Erro ao comentar:', data.message);
+            console.log(' Erro ao comentar:', data.message);
             showToast(data.message || 'Erro ao adicionar comentário', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao adicionar comentário:', error);
+        console.error(' Erro ao adicionar comentário:', error);
         showToast('Erro de conexão', 'error');
     }
 }
@@ -487,7 +487,7 @@ async function deletePost(postId) {
     }
     
     try {
-        console.log('🗑️ Deletando postagem:', postId);
+        console.log(' Deletando postagem:', postId);
         
         const response = await fetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
             method: 'DELETE',
@@ -502,15 +502,15 @@ async function deletePost(postId) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Postagem deletada:', postId);
+            console.log(' Postagem deletada:', postId);
             showToast('Postagem deletada com sucesso!', 'success');
             loadFeed(); // Recarregar feed
         } else {
-            console.log('❌ Erro ao deletar postagem:', data.message);
+            console.log(' Erro ao deletar postagem:', data.message);
             showToast(data.message || 'Erro ao deletar postagem', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao deletar postagem:', error);
+        console.error(' Erro ao deletar postagem:', error);
         showToast('Erro de conexão', 'error');
     }
 }
@@ -540,7 +540,7 @@ function handleLogout() {
         localStorage.removeItem('userToken');
         currentUser = null;
         
-        console.log('✅ Logout realizado');
+        console.log(' Logout realizado');
         showToast('Logout realizado com sucesso!', 'success');
         
         setTimeout(() => {
@@ -658,7 +658,7 @@ function openUserProfile(userId) {
         return;
     }
     
-    console.log('🔄 Abrindo perfil do usuário:', userId);
+    console.log(' Abrindo perfil do usuário:', userId);
     
     // Verificar se é o próprio usuário
     if (currentUser && currentUser.id == userId) {

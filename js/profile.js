@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Carregar perfil de outro usuário
 async function loadUserProfile(userId) {
     try {
-        console.log('🔄 Carregando perfil do usuário:', userId);
+        console.log(' Carregando perfil do usuário:', userId);
         
         const response = await fetch(`${API_BASE_URL}/users/${userId}`);
         const result = await response.json();
@@ -44,7 +44,7 @@ async function loadUserProfile(userId) {
             const posts = result.data.posts;
             const stats = result.data.stats;
             
-            console.log('✅ Perfil carregado:', user);
+            console.log(' Perfil carregado:', user);
             
             // Atualizar elementos da página
             updateProfileElements(user, stats);
@@ -56,7 +56,7 @@ async function loadUserProfile(userId) {
             toggleEditButtons(isOwnProfile);
             
         } else {
-            console.error('❌ Erro ao carregar perfil:', result.message);
+            console.error(' Erro ao carregar perfil:', result.message);
             showToast('Usuário não encontrado', 'error');
             setTimeout(() => {
                 window.location.href = '/feed';
@@ -64,7 +64,7 @@ async function loadUserProfile(userId) {
         }
         
     } catch (error) {
-        console.error('❌ Erro ao carregar perfil:', error);
+        console.error(' Erro ao carregar perfil:', error);
         showToast('Erro ao carregar perfil', 'error');
     }
 }

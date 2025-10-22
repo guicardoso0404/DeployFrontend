@@ -6,19 +6,19 @@ let viewingUserId = null;
 let userPosts = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔄 USER-PROFILE: Página carregando...');
+    console.log(' USER-PROFILE: Página carregando...');
     
     // Verificar usuário logado
     currentUser = getCurrentUser();
-    console.log('🔄 USER-PROFILE: Usuário atual:', currentUser);
+    console.log(' USER-PROFILE: Usuário atual:', currentUser);
     
     // Obter ID do usuário a ser visualizado da URL
     const urlParams = new URLSearchParams(window.location.search);
     viewingUserId = urlParams.get('user');
-    console.log('🔄 USER-PROFILE: ID do usuário para visualizar:', viewingUserId);
+    console.log(' USER-PROFILE: ID do usuário para visualizar:', viewingUserId);
     
     if (!viewingUserId) {
-        console.error('❌ USER-PROFILE: ID do usuário não encontrado na URL');
+        console.error(' USER-PROFILE: ID do usuário não encontrado na URL');
         showToast('ID do usuário não encontrado', 'error');
         setTimeout(() => {
             window.location.href = '/feed';
@@ -51,15 +51,15 @@ function setupEventListeners() {
 // Carregar perfil do usuário
 async function loadUserProfile() {
     try {
-        console.log('🔄 USER-PROFILE: Iniciando carregamento do perfil...');
+        console.log(' USER-PROFILE: Iniciando carregamento do perfil...');
         showLoading(true);
-        console.log('🔄 USER-PROFILE: Carregando perfil do usuário:', viewingUserId);
+        console.log(' USER-PROFILE: Carregando perfil do usuário:', viewingUserId);
         
         const response = await fetch(`${API_BASE_URL}/users/${viewingUserId}`);
-        console.log('🔄 USER-PROFILE: Resposta recebida:', response.status);
+        console.log(' USER-PROFILE: Resposta recebida:', response.status);
         
         const result = await response.json();
-        console.log('🔄 USER-PROFILE: Dados recebidos:', result);
+        console.log(' USER-PROFILE: Dados recebidos:', result);
         
         if (result.success) {
             const user = result.data.user;
@@ -67,11 +67,11 @@ async function loadUserProfile() {
             const stats = result.data.stats;
             
             // Log para depuração do formato da data
-            console.log('🔄 USER-PROFILE: Data de criação bruta:', user.data_criacao);
-            console.log('🔄 USER-PROFILE: Tipo da data:', typeof user.data_criacao);
+            console.log(' USER-PROFILE: Data de criação bruta:', user.data_criacao);
+            console.log(' USER-PROFILE: Tipo da data:', typeof user.data_criacao);
             
-            console.log('✅ USER-PROFILE: Perfil carregado:', user);
-            console.log('✅ USER-PROFILE: Posts encontrados:', posts.length);
+            console.log(' USER-PROFILE: Perfil carregado:', user);
+            console.log(' USER-PROFILE: Posts encontrados:', posts.length);
             
             // Atualizar informações do usuário
             updateUserInfo(user, stats);
@@ -83,12 +83,12 @@ async function loadUserProfile() {
             displayUserPosts(posts);
             
         } else {
-            console.error('❌ USER-PROFILE: Erro ao carregar perfil:', result.message);
+            console.error(' USER-PROFILE: Erro ao carregar perfil:', result.message);
             showError('Usuário não encontrado');
         }
         
     } catch (error) {
-        console.error('❌ USER-PROFILE: Erro ao carregar perfil:', error);
+        console.error(' USER-PROFILE: Erro ao carregar perfil:', error);
         showError('Erro ao carregar perfil');
     } finally {
         showLoading(false);
@@ -97,7 +97,7 @@ async function loadUserProfile() {
 
 // Atualizar informações do usuário
 function updateUserInfo(user, stats) {
-    console.log('🔍 Detalhes completos do usuário recebidos:', user);
+    console.log(' Detalhes completos do usuário recebidos:', user);
     
     // Avatar
     const userAvatar = document.getElementById('userAvatar');
@@ -123,7 +123,7 @@ function updateUserInfo(user, stats) {
     // Data de membro
     if (user.data_criacao) {
         try {
-            console.log('🔄 Data de criação original:', user.data_criacao);
+            console.log(' Data de criação original:', user.data_criacao);
             
             // Tentar formatar a data de diferentes maneiras
             let memberDate;
@@ -131,7 +131,7 @@ function updateUserInfo(user, stats) {
             
             // Primeiro, tentar criar um objeto Date a partir da string
             memberDate = new Date(user.data_criacao);
-            console.log('🔄 Data tentativa #1:', memberDate);
+            console.log(' Data tentativa #1:', memberDate);
             
             // Se falhar ou resultar em data inválida, tentar outros formatos
             if (isNaN(memberDate.getTime())) {
@@ -139,7 +139,7 @@ function updateUserInfo(user, stats) {
                 if (typeof user.data_criacao === 'string' && user.data_criacao.includes('-')) {
                     const parts = user.data_criacao.split(/[- :]/);
                     memberDate = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                    console.log('🔄 Data tentativa #2:', memberDate);
+                    console.log(' Data tentativa #2:', memberDate);
                 }
             }
             
@@ -150,20 +150,20 @@ function updateUserInfo(user, stats) {
                     year: 'numeric'
                 });
                 document.getElementById('memberSince').textContent = formattedDate;
-                console.log('✅ Data formatada com sucesso:', formattedDate);
+                console.log(' Data formatada com sucesso:', formattedDate);
             } else {
                 // Se nenhuma tentativa funcionou, tentar mostrar a data bruta
                 if (typeof user.data_criacao === 'string') {
                     const simpleDate = user.data_criacao.split(' ')[0]; // Pegar apenas a parte da data
                     document.getElementById('memberSince').textContent = simpleDate;
-                    console.log('⚠️ Usando data simplificada:', simpleDate);
+                    console.log(' Usando data simplificada:', simpleDate);
                 } else {
                     document.getElementById('memberSince').textContent = 'Data indisponível';
-                    console.error('❌ Data inválida e não processável:', user.data_criacao);
+                    console.error(' Data inválida e não processável:', user.data_criacao);
                 }
             }
         } catch (error) {
-            console.error('❌ Erro ao formatar data de membro:', error);
+            console.error(' Erro ao formatar data de membro:', error);
             document.getElementById('memberSince').textContent = 'Data indisponível';
         }
     } else {

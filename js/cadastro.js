@@ -4,7 +4,7 @@ const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
 
 document.addEventListener('DOMContentLoaded', function() {
     // FORÇAR LIMPEZA COMPLETA PARA DEBUG
-    console.log('🧹 Limpando localStorage para debug...');
+    console.log(' Limpando localStorage para debug...');
     localStorage.clear();
     sessionStorage.clear();
     
@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verificar se usuário já está logado
         const currentUser = getCurrentUser();
         if (currentUser) {
-            console.log('✅ Usuário já logado, redirecionando...');
+            console.log(' Usuário já logado, redirecionando...');
             window.location.href = '/feed';
             return;
         }
         
-        console.log('📝 Usuário não logado, carregando página de cadastro');
+        console.log(' Usuário não logado, carregando página de cadastro');
     }, 100);
     
     // Configurar formulário de cadastro
@@ -79,7 +79,7 @@ async function handleRegister(event) {
     setButtonLoading(submitButton, true);
     
     try {
-        console.log('📝 Tentando cadastro:', data.email);
+        console.log(' Tentando cadastro:', data.email);
         
         const response = await fetch(`${API_BASE_URL}/auth/cadastro`, {
             method: 'POST',
@@ -92,12 +92,12 @@ async function handleRegister(event) {
         const result = await response.json();
         
         if (result.success) {
-            console.log('✅ Cadastro realizado com sucesso!');
-            console.log('👤 Dados do usuário cadastrado:', result.data);
+            console.log(' Cadastro realizado com sucesso!');
+            console.log(' Dados do usuário cadastrado:', result.data);
             showToast('Cadastro realizado com sucesso!', 'success');
             
             // Fazer login automático após cadastro
-            console.log('🔐 Fazendo login automático...');
+            console.log(' Fazendo login automático...');
             
             try {
                 const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -114,8 +114,8 @@ async function handleRegister(event) {
                 const loginResult = await loginResponse.json();
                 
                 if (loginResult.success) {
-                    console.log('✅ Login automático realizado!');
-                    console.log('👤 Usuário logado:', loginResult.data.usuario);
+                    console.log(' Login automático realizado!');
+                    console.log(' Usuário logado:', loginResult.data.usuario);
                     
                     // Salvar dados do usuário no localStorage
                     localStorage.setItem('currentUser', JSON.stringify(loginResult.data.usuario));
@@ -124,29 +124,29 @@ async function handleRegister(event) {
                     
                     // Redirecionar para o feed imediatamente
                     setTimeout(() => {
-                        console.log('🔄 Redirecionando para o feed...');
+                        console.log(' Redirecionando para o feed...');
                         window.location.href = '/feed';
                     }, 1000);
                 } else {
-                    console.log('⚠️ Login automático falhou:', loginResult.message);
+                    console.log(' Login automático falhou:', loginResult.message);
                     showToast('Cadastro realizado! Redirecionando para o login...', 'success');
                     setTimeout(() => {
                         window.location.href = '/login';
                     }, 1500);
                 }
             } catch (loginError) {
-                console.error('❌ Erro no login automático:', loginError);
+                console.error(' Erro no login automático:', loginError);
                 showToast('Cadastro realizado! Redirecionando para o login...', 'success');
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 1500);
             }
         } else {
-            console.log('❌ Cadastro falhou:', result.message);
+            console.log(' Cadastro falhou:', result.message);
             showToast(result.message || 'Erro no cadastro', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro no cadastro:', error);
+        console.error(' Erro no cadastro:', error);
         showToast('Erro de conexão. Verifique se o servidor está rodando.', 'error');
     } finally {
         setButtonLoading(submitButton, false);

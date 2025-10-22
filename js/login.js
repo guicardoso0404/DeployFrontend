@@ -2,10 +2,10 @@
 // Configurações da API
 const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
 
-console.log('🔧 Login.js carregado!');
+console.log(' Login.js carregado!');
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 DOM carregado - configurando login');
+    console.log(' DOM carregado - configurando login');
     
     // COMENTADO PARA PERMITIR ACESSO SEMPRE:
     // const currentUser = getCurrentUser();
@@ -17,13 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar formulário de login
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        console.log('✅ Formulário de login encontrado');
+        console.log(' Formulário de login encontrado');
         loginForm.addEventListener('submit', handleLogin);
         
         // Configurar validação em tempo real
         setupFormValidation();
     } else {
-        console.error('❌ Formulário de login não encontrado!');
+        console.error(' Formulário de login não encontrado!');
     }
     
     // Configurar toggle de senha
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Função de login
 async function handleLogin(event) {
-    console.log('🔧 handleLogin chamada!');
+    console.log(' handleLogin chamada!');
     event.preventDefault();
     
     const form = event.target;
@@ -46,18 +46,18 @@ async function handleLogin(event) {
     const senha = form.senha.value;
     const submitButton = form.querySelector('button[type="submit"]');
     
-    console.log('📧 Email:', email);
-    console.log('🔒 Senha:', senha ? '***' : 'vazia');
+    console.log(' Email:', email);
+    console.log(' Senha:', senha ? '***' : 'vazia');
     
     // Validações básicas
     if (!email || !senha) {
-        console.log('❌ Campos vazios');
+        console.log(' Campos vazios');
         showToast('Por favor, preencha todos os campos', 'error');
         return;
     }
     
     if (!validateEmail(email)) {
-        console.log('❌ Email inválido');
+        console.log(' Email inválido');
         showToast('E-mail inválido', 'error');
         return;
     }
@@ -65,7 +65,7 @@ async function handleLogin(event) {
     setButtonLoading(submitButton, true);
     
     try {
-        console.log('🔐 Tentando login:', email);
+        console.log(' Tentando login:', email);
         
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
@@ -75,13 +75,13 @@ async function handleLogin(event) {
             body: JSON.stringify({ email, senha })
         });
         
-        console.log('📡 Resposta recebida:', response.status);
+        console.log(' Resposta recebida:', response.status);
         
         const data = await response.json();
-        console.log('📊 Dados:', data);
+        console.log(' Dados:', data);
         
         if (data.success) {
-            console.log('✅ Login realizado:', data.data.usuario.nome);
+            console.log(' Login realizado:', data.data.usuario.nome);
             
             // Salvar usuário no localStorage
             localStorage.setItem('currentUser', JSON.stringify(data.data.usuario));
@@ -90,15 +90,15 @@ async function handleLogin(event) {
             
             // Redirecionar após delay
             setTimeout(() => {
-                console.log('🔄 Redirecionando para:', data.data.redirectTo);
+                console.log(' Redirecionando para:', data.data.redirectTo);
                 window.location.href = data.data.redirectTo || '/feed';
             }, 1500);
         } else {
-            console.log('❌ Login falhou:', data.message);
+            console.log(' Login falhou:', data.message);
             showToast(data.message || 'Erro no login', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro no login:', error);
+        console.error(' Erro no login:', error);
         showToast('Erro de conexão. Verifique se o servidor está rodando.', 'error');
     } finally {
         setButtonLoading(submitButton, false);

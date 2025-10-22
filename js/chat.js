@@ -6,24 +6,24 @@ let socket = null;
 let activeConversationId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔄 Chat carregando...');
+    console.log(' Chat carregando...');
     
     // Verificar se usuário está logado
     currentUser = getCurrentUser();
     
     if (currentUser) {
-        console.log('✅ Usuário logado detectado:', currentUser.nome, currentUser.email);
+        console.log(' Usuário logado detectado:', currentUser.nome, currentUser.email);
         setupChatInterface();
     } else {
-        console.log('❌ Usuário não logado - modo somente visualização');
+        console.log(' Usuário não logado - modo somente visualização');
         document.getElementById('guestMessageSection').style.display = 'flex';
         document.getElementById('chatInterface').style.display = 'none';
     }
     
     // Configurar interface comum
     setupUserInterface();
-    
-    console.log('✅ Chat inicializado!');
+
+    console.log(' Chat inicializado!');
 });
 
 // Configurar interface do usuário
@@ -57,7 +57,7 @@ function setupUserInterface() {
             }
         }
     } else {
-        console.log('🔧 Configurando interface para visitante');
+        console.log(' Configurando interface para visitante');
         
         // Mostrar área do visitante
         if (loggedUserArea) loggedUserArea.style.display = 'none';
@@ -133,7 +133,7 @@ function initializeSocket() {
     socket = io('http://localhost:3002');
     
     socket.on('connect', () => {
-        console.log('✅ Socket conectado:', socket.id);
+        console.log(' Socket conectado:', socket.id);
         
         // Autenticar com o servidor
         socket.emit('authenticate', { userId: currentUser.id });
@@ -141,14 +141,14 @@ function initializeSocket() {
     
     socket.on('authenticated', (data) => {
         if (data.success) {
-            console.log('✅ Socket autenticado');
+            console.log(' Socket autenticado');
         } else {
-            console.error('❌ Falha na autenticação do socket');
+            console.error(' Falha na autenticação do socket');
         }
     });
     
     socket.on('new_message', (data) => {
-        console.log('📩 Nova mensagem recebida:', data);
+        console.log(' Nova mensagem recebida:', data);
         
         // Se for da conversa ativa, adicionar à lista de mensagens
         if (activeConversationId && data.conversaId == activeConversationId) {
@@ -176,11 +176,11 @@ function initializeSocket() {
     });
     
     socket.on('disconnect', () => {
-        console.log('❌ Socket desconectado');
+        console.log(' Socket desconectado');
     });
     
     socket.on('connect_error', (error) => {
-        console.error('❌ Erro de conexão socket:', error);
+        console.error(' Erro de conexão socket:', error);
     });
 }
 
@@ -196,7 +196,7 @@ async function loadConversations() {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Conversas carregadas:', data.data.length);
+            console.log(' Conversas carregadas:', data.data.length);
             
             if (data.data.length === 0) {
                 conversationsList.innerHTML = '<div class="loading-msg">Nenhuma conversa encontrada</div>';
@@ -210,11 +210,11 @@ async function loadConversations() {
                 conversationsList.appendChild(conversationItem);
             });
         } else {
-            console.log('❌ Erro ao carregar conversas:', data.message);
+            console.log(' Erro ao carregar conversas:', data.message);
             conversationsList.innerHTML = '<div class="loading-msg">Erro ao carregar conversas</div>';
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar conversas:', error);
+        console.error(' Erro ao carregar conversas:', error);
         document.getElementById('conversationsList').innerHTML = 
             '<div class="loading-msg">Erro de conexão</div>';
     }
@@ -293,7 +293,7 @@ function createConversationItem(conversa) {
 // Carregar conversa específica
 async function loadConversation(conversaId) {
     try {
-        console.log('🔄 Carregando conversa:', conversaId);
+        console.log(' Carregando conversa:', conversaId);
         
         // Atualizar conversa ativa
         activeConversationId = conversaId;
@@ -316,7 +316,7 @@ async function loadConversation(conversaId) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Mensagens carregadas:', data.data.length);
+            console.log(' Mensagens carregadas:', data.data.length);
             
             // Buscar informações da conversa para atualizar cabeçalho
             loadConversationHeader(conversaId);
@@ -356,7 +356,7 @@ async function loadConversation(conversaId) {
             showToast(data.message, 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar conversa:', error);
+        console.error(' Erro ao carregar conversa:', error);
         showToast('Erro ao carregar conversa', 'error');
     }
 }
@@ -364,16 +364,16 @@ async function loadConversation(conversaId) {
 // Carregar informações do cabeçalho da conversa
 async function loadConversationHeader(conversaId) {
     try {
-        console.log('🔄 Carregando cabeçalho da conversa:', conversaId);
+        console.log(' Carregando cabeçalho da conversa:', conversaId);
         const response = await fetch(`${API_BASE_URL}/chat/conversas/${currentUser.id}`);
         const data = await response.json();
         
         if (data.success) {
-            console.log('🔍 Todas as conversas disponíveis:', data.data);
+            console.log(' Todas as conversas disponíveis:', data.data);
             const conversa = data.data.find(c => c.id == conversaId);
             
             if (conversa) {
-                console.log('🔍 Conversa selecionada:', conversa);
+                console.log(' Conversa selecionada:', conversa);
                 const chatUserName = document.getElementById('chatUserName');
                 const chatUserAvatar = document.getElementById('chatUserAvatar').querySelector('img');
                 
@@ -382,7 +382,7 @@ async function loadConversationHeader(conversaId) {
                 
                 // Se for chat individual
                 if (conversa.tipo === 'individual' && conversa.outro_usuario) {
-                    console.log('🔍 Detalhes completos do outro usuário:', conversa.outro_usuario);
+                    console.log(' Detalhes completos do outro usuário:', conversa.outro_usuario);
                     
                     // Salvar informações do usuário atual do chat para uso no dropdown
                     // Garantir que o objeto tenha todas as propriedades necessárias
@@ -394,7 +394,7 @@ async function loadConversationHeader(conversaId) {
                     };
                     
                     // Verificar e logar informações do usuário para depuração
-                    console.log('✅ Informações do usuário atual do chat armazenadas:', currentChatUser);
+                    console.log(' Informações do usuário atual do chat armazenadas:', currentChatUser);
                     
                     nomeExibicao = conversa.outro_usuario.nome;
                     
@@ -404,7 +404,7 @@ async function loadConversationHeader(conversaId) {
                 } else {
                     // Resetar usuário atual se não for chat individual
                     currentChatUser = null;
-                    console.log('🔄 Resetando informações do usuário atual do chat - não é chat individual');
+                    console.log(' Resetando informações do usuário atual do chat - não é chat individual');
                 }
                 
                 chatUserName.textContent = nomeExibicao;
@@ -418,13 +418,13 @@ async function loadConversationHeader(conversaId) {
                     document.getElementById('chatOptionsBtn').style.display = 'none';
                 }
             } else {
-                console.warn('⚠️ Conversa não encontrada:', conversaId);
+                console.warn(' Conversa não encontrada:', conversaId);
             }
         } else {
-            console.error('❌ Erro ao buscar conversas:', data.message);
+            console.error(' Erro ao buscar conversas:', data.message);
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar cabeçalho da conversa:', error);
+        console.error(' Erro ao carregar cabeçalho da conversa:', error);
     }
 }
 
@@ -522,7 +522,7 @@ async function handleSendMessage(event) {
     }
     
     try {
-        console.log('📤 Enviando mensagem para conversa:', activeConversationId);
+        console.log(' Enviando mensagem para conversa:', activeConversationId);
         
         // Remover mensagem "Nenhuma mensagem ainda" se existir
         const messagesContainer = document.getElementById('messagesContainer');
@@ -541,7 +541,7 @@ async function handleSendMessage(event) {
             conteudo: message
         });
     } catch (error) {
-        console.error('❌ Erro ao enviar mensagem:', error);
+        console.error(' Erro ao enviar mensagem:', error);
         showToast('Erro ao enviar mensagem', 'error');
     }
 }
@@ -644,7 +644,7 @@ async function searchUsers(term) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Usuários encontrados:', data.data.length);
+            console.log(' Usuários encontrados:', data.data.length);
             
             if (data.data.length === 0) {
                 searchResults.innerHTML = '<div class="loading-msg">Nenhum usuário encontrado</div>';
@@ -723,11 +723,11 @@ async function createConversation(outroUsuarioId) {
             // Abrir conversa
             loadConversation(data.data.id);
         } else {
-            console.log('❌ Erro ao criar conversa:', data.message);
+            console.log(' Erro ao criar conversa:', data.message);
             showToast(data.message, 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao criar conversa:', error);
+        console.error(' Erro ao criar conversa:', error);
         showToast('Erro ao criar conversa', 'error');
     }
 }
@@ -786,7 +786,7 @@ function getCurrentUser() {
 // Formatar data para exibição (relativos)
 function formatDate(dateString) {
     try {
-        console.log('🔄 Formatando data relativa, data original:', dateString);
+        console.log(' Formatando data relativa, data original:', dateString);
         
         // Tentar criar um objeto Date a partir da string
         let date = new Date(dateString);
@@ -799,13 +799,13 @@ function formatDate(dateString) {
             if (typeof dateString === 'string' && dateString.includes('-')) {
                 const parts = dateString.split(/[- :]/);
                 date = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                console.log('🔄 Data relativa após tentativa alternativa:', date);
+                console.log(' Data relativa após tentativa alternativa:', date);
             }
         }
         
         // Se ainda for inválida, retornar um valor padrão
         if (isNaN(date.getTime())) {
-            console.error('❌ Não foi possível formatar a data relativa:', dateString);
+            console.error(' Não foi possível formatar a data relativa:', dateString);
             return 'Agora';
         }
         
@@ -819,7 +819,7 @@ function formatDate(dateString) {
         
         return date.toLocaleDateString('pt-BR');
     } catch (error) {
-        console.error('❌ Erro ao formatar data relativa:', error);
+        console.error(' Erro ao formatar data relativa:', error);
         return 'Agora';
     }
 }
@@ -827,26 +827,26 @@ function formatDate(dateString) {
 // Formatar data completa para divisores
 function formatDisplayDate(dateString) {
     try {
-        console.log('🔄 Formatando data para divisor, data original:', dateString);
+        console.log(' Formatando data para divisor, data original:', dateString);
         
         // Tentar criar um objeto Date a partir da string
         let date = new Date(dateString);
         
         // Verificar se a data é válida
         if (isNaN(date.getTime())) {
-            console.log('⚠️ Data inválida para divisor, tentando outros formatos');
+            console.log(' Data inválida para divisor, tentando outros formatos');
             
             // Tentar formato MySQL YYYY-MM-DD HH:MM:SS
             if (typeof dateString === 'string' && dateString.includes('-')) {
                 const parts = dateString.split(/[- :]/);
                 date = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                console.log('🔄 Data para divisor após tentativa alternativa:', date);
+                console.log(' Data para divisor após tentativa alternativa:', date);
             }
         }
         
         // Se ainda for inválida, retornar um valor padrão
         if (isNaN(date.getTime())) {
-            console.error('❌ Não foi possível formatar a data para divisor:', dateString);
+            console.error(' Não foi possível formatar a data para divisor:', dateString);
             return 'Data não disponível';
         }
         
@@ -868,7 +868,7 @@ function formatDisplayDate(dateString) {
             year: 'numeric'
         });
     } catch (error) {
-        console.error('❌ Erro ao formatar data para divisor:', error);
+        console.error(' Erro ao formatar data para divisor:', error);
         return 'Data não disponível';
     }
 }
@@ -876,26 +876,26 @@ function formatDisplayDate(dateString) {
 // Formatar horário
 function formatTime(dateString) {
     try {
-        console.log('🔄 Formatando horário, data original:', dateString);
+        console.log(' Formatando horário, data original:', dateString);
         
         // Tentar criar um objeto Date a partir da string
         let date = new Date(dateString);
         
         // Verificar se a data é válida
         if (isNaN(date.getTime())) {
-            console.log('⚠️ Data inválida, tentando outros formatos');
+            console.log(' Data inválida, tentando outros formatos');
             
             // Tentar formato MySQL YYYY-MM-DD HH:MM:SS
             if (typeof dateString === 'string' && dateString.includes('-')) {
                 const parts = dateString.split(/[- :]/);
                 date = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                console.log('🔄 Data após tentativa alternativa:', date);
+                console.log(' Data após tentativa alternativa:', date);
             }
         }
         
         // Se ainda for inválida, retornar um valor padrão
         if (isNaN(date.getTime())) {
-            console.error('❌ Não foi possível formatar a data:', dateString);
+            console.error(' Não foi possível formatar a data:', dateString);
             return 'Agora';
         }
         
@@ -904,7 +904,7 @@ function formatTime(dateString) {
             minute: '2-digit'
         });
     } catch (error) {
-        console.error('❌ Erro ao formatar horário:', error);
+        console.error(' Erro ao formatar horário:', error);
         return 'Agora';
     }
 }
@@ -915,7 +915,7 @@ function handleLogout() {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('userToken');
         
-        console.log('✅ Logout realizado');
+        console.log(' Logout realizado');
         showToast('Logout realizado com sucesso!', 'success');
         
         setTimeout(() => {
@@ -994,14 +994,14 @@ document.addEventListener('DOMContentLoaded', function() {
         viewProfileBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            console.log('🔍 Tentando navegar para o perfil do usuário, dados disponíveis:', currentChatUser);
+            console.log(' Tentando navegar para o perfil do usuário, dados disponíveis:', currentChatUser);
             
             if (currentChatUser && currentChatUser.id) {
-                console.log('✅ Navegando para o perfil do usuário:', currentChatUser.id);
+                console.log(' Navegando para o perfil do usuário:', currentChatUser.id);
                 // Navegar para a página de perfil do usuário - usando o parâmetro 'user' em vez de 'id'
                 window.location.href = `/html/user-profile.html?user=${currentChatUser.id}`;
             } else {
-                console.error('❌ ID do usuário não encontrado para navegação');
+                console.error(' ID do usuário não encontrado para navegação');
                 showToast('Não foi possível encontrar o perfil do usuário', 'error');
             }
             
