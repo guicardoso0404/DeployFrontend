@@ -136,22 +136,11 @@ function setupUserMenu() {
         });
     }
 }
-    document.addEventListener('click', function(e) {
-        if (!userMenuBtn.contains(e.target)) {
-            userDropdown.classList.remove('show');
-        }
-    });
-    
-    // Botões apenas se estiver logado
-    if (currentUser) {
-        // Botão Perfil
-        if (profileBtn) {
-            profileBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = '/profile';
-            });
-        }
-}
+    // user menu interactions are handled inside this function using
+    // elements retrieved locally (profileBtn, chatBtn, logoutBtn).
+    // Removed stray/global event handlers that referenced undefined
+    // variables (userMenuBtn, userDropdown, profileBtn) to avoid
+    // runtime ReferenceError when the script loads.
 
 // Criar postagem
 async function handleCreatePost(event) {
@@ -581,6 +570,8 @@ function formatDate(dateString) {
 }
 
 function setButtonLoading(button, loading = true) {
+    if (!button) return; // guard: avoid errors when button isn't found
+
     if (loading) {
         button.classList.add('loading');
         button.disabled = true;
