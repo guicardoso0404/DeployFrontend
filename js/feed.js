@@ -268,9 +268,9 @@ function renderPosts(posts) {
                 ${escapeHtml(post.conteudo)}
             </div>
             
-            ${post.imagem ? `
+            ${post.imagem_url ? `
                 <div class="post-image">
-                    <img src="${post.imagem}" alt="Imagem do post" onclick="openImageModal('${post.imagem}')" loading="lazy">
+                    <img src="${post.imagem_url}" alt="Imagem do post" onclick="openImageModal('${post.imagem_url}')" loading="lazy">
                 </div>
             ` : ''}
             
