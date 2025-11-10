@@ -79,7 +79,9 @@ function updateProfileElements(user, stats) {
     document.getElementById('companyDescription').textContent = user.descricao || 'Descrição não informada';
     
     // Carregar foto de perfil se existir
-    if (user.foto_perfil) {
+    if (user.foto_perfil_url) {
+        document.getElementById('profileAvatar').src = user.foto_perfil_url;
+    } else if (user.foto_perfil) {
         document.getElementById('profileAvatar').src = user.foto_perfil;
     }
     
@@ -139,9 +141,9 @@ function displayUserPosts(posts) {
                 ${escapeHtml(post.conteudo)}
             </div>
             
-            ${post.imagem ? `
+            ${post.imagem_url ? `
                 <div class="post-image">
-                    <img src="${post.imagem}" alt="Imagem do post">
+                    <img src="${post.imagem_url}" alt="Imagem do post">
                 </div>
             ` : ''}
             
@@ -171,7 +173,9 @@ function loadProfileInfo() {
     document.getElementById('companyDescription').textContent = currentUser.descricao || 'Descrição da empresa não informada';
     
     // Carregar foto de perfil se existir
-    if (currentUser.foto_perfil) {
+    if (currentUser.foto_perfil_url) {
+        document.getElementById('profileAvatar').src = currentUser.foto_perfil_url;
+    } else if (currentUser.foto_perfil) {
         document.getElementById('profileAvatar').src = currentUser.foto_perfil;
     }
     
@@ -524,12 +528,16 @@ async function handleAvatarUpload(event) {
         const result = await response.json();
         
         if (result.success) {
-            // Atualizar foto de perfil
-            currentUser.foto_perfil = result.data.foto_perfil;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Atualizar interface
-            document.getElementById('profileAvatar').src = result.data.foto_perfil;
+            // Atualizar foto de perfil - priorizar foto_perfil_url
+            const fotoUrl = result.data.foto_perfil_url || result.data.foto_perfil;
+            if (fotoUrl) {
+                currentUser.foto_perfil = fotoUrl;
+                currentUser.foto_perfil_url = fotoUrl;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Atualizar interface
+                document.getElementById('profileAvatar').src = fotoUrl;
+            }
             showToast('Foto de perfil atualizada com sucesso!', 'success');
         } else {
             showToast(result.message || 'Erro ao fazer upload da foto', 'error');

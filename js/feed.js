@@ -49,8 +49,9 @@ function setupUserInterface() {
         // Atualizar foto de perfil no header
         const headerUserAvatar = document.getElementById('headerUserAvatar');
         if (headerUserAvatar) {
-            if (currentUser.foto_perfil) {
-                headerUserAvatar.src = currentUser.foto_perfil;
+            const fotoUrl = currentUser.foto_perfil_url || currentUser.foto_perfil;
+            if (fotoUrl) {
+                headerUserAvatar.src = fotoUrl;
                 headerUserAvatar.alt = `Foto de ${currentUser.nome}`;
             } else {
                 // Se não tiver foto, usar logo padrão
@@ -246,8 +247,8 @@ function renderPosts(posts) {
         <article class="post-card" data-post-id="${post.id}">
             <div class="post-header">
                 <div class="user-avatar" onclick="openUserProfile(${post.usuario_id})">
-                    ${post.foto_perfil ? 
-                        `<img src="${post.foto_perfil}" alt="Foto de ${post.usuario_nome}" />` : 
+                    ${(post.foto_perfil_url || post.foto_perfil) ? 
+                        `<img src="${post.foto_perfil_url || post.foto_perfil}" alt="Foto de ${post.usuario_nome}" />` : 
                         `<div class="avatar-placeholder">${post.usuario_nome ? post.usuario_nome.charAt(0).toUpperCase() : 'U'}</div>`
                     }
                 </div>
@@ -318,8 +319,8 @@ function renderComments(comments) {
     return comments.map(comment => `
         <div class="comment">
             <div class="comment-avatar" onclick="openUserProfile(${comment.usuario_id})">
-                ${comment.foto_perfil ? 
-                    `<img src="${comment.foto_perfil}" alt="Foto de ${comment.usuario_nome}" />` : 
+                ${(comment.foto_perfil_url || comment.foto_perfil) ? 
+                    `<img src="${comment.foto_perfil_url || comment.foto_perfil}" alt="Foto de ${comment.usuario_nome}" />` : 
                     `<div class="avatar-placeholder">${comment.usuario_nome ? comment.usuario_nome.charAt(0).toUpperCase() : 'U'}</div>`
                 }
             </div>
