@@ -101,9 +101,17 @@ function updateUserInfo(user, stats) {
     
     // Avatar
     const userAvatar = document.getElementById('userAvatar');
-    if (user.foto_perfil) {
-        userAvatar.src = user.foto_perfil;
+    const fotoUrl = user.foto_perfil_url || user.foto_perfil;
+    
+    if (fotoUrl) {
+        console.log(' Carregando foto de perfil do usuário:', fotoUrl);
+        userAvatar.src = fotoUrl;
+        userAvatar.onerror = function() {
+            console.error(' Erro ao carregar foto, usando padrão');
+            this.src = '../assets/imagens/Logo.png';
+        };
     } else {
+        console.log(' Nenhuma foto de perfil encontrada, usando padrão');
         userAvatar.src = '../assets/imagens/Logo.png';
     }
     userAvatar.alt = `Foto de ${user.nome}`;
@@ -204,9 +212,9 @@ function displayUserPosts(posts) {
                 ${escapeHtml(post.conteudo)}
             </div>
             
-            ${post.imagem ? `
+            ${post.imagem_url ? `
                 <div class="post-image">
-                    <img src="${post.imagem}" alt="Imagem do post" onclick="openImageModal('${post.imagem}')">
+                    <img src="${post.imagem_url}" alt="Imagem do post" onclick="openImageModal('${post.imagem_url}')">
                 </div>
             ` : ''}
             

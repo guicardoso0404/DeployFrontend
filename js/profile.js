@@ -79,10 +79,18 @@ function updateProfileElements(user, stats) {
     document.getElementById('companyDescription').textContent = user.descricao || 'Descrição não informada';
     
     // Carregar foto de perfil se existir
-    if (user.foto_perfil_url) {
-        document.getElementById('profileAvatar').src = user.foto_perfil_url;
-    } else if (user.foto_perfil) {
-        document.getElementById('profileAvatar').src = user.foto_perfil;
+    const profileAvatar = document.getElementById('profileAvatar');
+    const fotoUrl = user.foto_perfil_url || user.foto_perfil;
+    
+    if (fotoUrl && profileAvatar) {
+        console.log(' Carregando foto de perfil:', fotoUrl);
+        profileAvatar.src = fotoUrl;
+        profileAvatar.onerror = function() {
+            console.error(' Erro ao carregar foto, usando padrão');
+            this.src = '../assets/imagens/Logo.png';
+        };
+    } else {
+        console.log(' Nenhuma foto de perfil encontrada');
     }
     
     // Atualizar data de criação
@@ -173,10 +181,18 @@ function loadProfileInfo() {
     document.getElementById('companyDescription').textContent = currentUser.descricao || 'Descrição da empresa não informada';
     
     // Carregar foto de perfil se existir
-    if (currentUser.foto_perfil_url) {
-        document.getElementById('profileAvatar').src = currentUser.foto_perfil_url;
-    } else if (currentUser.foto_perfil) {
-        document.getElementById('profileAvatar').src = currentUser.foto_perfil;
+    const profileAvatar = document.getElementById('profileAvatar');
+    const fotoUrl = currentUser.foto_perfil_url || currentUser.foto_perfil;
+    
+    if (fotoUrl && profileAvatar) {
+        console.log(' Carregando foto de perfil próprio:', fotoUrl);
+        profileAvatar.src = fotoUrl;
+        profileAvatar.onerror = function() {
+            console.error(' Erro ao carregar foto, usando padrão');
+            this.src = '../assets/imagens/Logo.png';
+        };
+    } else {
+        console.log(' Nenhuma foto de perfil encontrada no currentUser');
     }
     
     // Definir data de criação (simulada)
@@ -530,13 +546,22 @@ async function handleAvatarUpload(event) {
         if (result.success) {
             // Atualizar foto de perfil - priorizar foto_perfil_url
             const fotoUrl = result.data.foto_perfil_url || result.data.foto_perfil;
+            console.log(' Upload bem-sucedido! URL da foto:', fotoUrl);
+            console.log(' Resposta completa:', result.data);
+            
             if (fotoUrl) {
                 currentUser.foto_perfil = fotoUrl;
                 currentUser.foto_perfil_url = fotoUrl;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 
                 // Atualizar interface
-                document.getElementById('profileAvatar').src = fotoUrl;
+                const avatarElement = document.getElementById('profileAvatar');
+                if (avatarElement) {
+                    avatarElement.src = fotoUrl;
+                    console.log(' Avatar atualizado na interface');
+                }
+            } else {
+                console.warn(' Upload sucesso mas URL não retornada');
             }
             showToast('Foto de perfil atualizada com sucesso!', 'success');
         } else {
