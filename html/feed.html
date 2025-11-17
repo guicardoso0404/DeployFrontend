@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed - NetworkUp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../css/feed.css">
     <link rel="icon" href="../assets/imagens/Logo.png">
     <meta name="description" content="Feed - NetworkUp - Conectando microempresas de tecnologia do RS">
@@ -31,9 +32,9 @@
                         </div>
                     </div>
                     <nav class="user-nav">
-                        <button id="chatBtn" class="nav-btn">💬 Chat</button>
-                        <button id="profileBtn" class="nav-btn">👤 Perfil</button>
-                        <button id="logoutBtn" class="nav-btn logout">🚪 Sair</button>
+                        <button id="chatBtn" class="nav-btn"><i class="bi bi-chat-dots-fill"></i> Chat</button>
+                        <button id="profileBtn" class="nav-btn"><i class="bi bi-person"></i> Perfil</button>
+                        <button id="logoutBtn" class="nav-btn logout"><i class="bi bi-box-arrow-right"></i> Sair</button>
                     </nav>
                 </div>
                 
@@ -68,11 +69,11 @@
                         <div class="photo-upload-section">
                             <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
                             <button type="button" class="photo-btn" onclick="document.getElementById('photoInput').click()">
-                                📷 Adicionar Foto
+                                <i class="bi bi-camera-fill"></i> Adicionar Foto
                             </button>
                             <div id="photoPreview" class="photo-preview" style="display: none;">
                                 <img id="previewImage" src="" alt="Preview">
-                                <button type="button" class="remove-photo" onclick="removePhoto()">❌</button>
+                                <button type="button" class="remove-photo" onclick="removePhoto()"><i class="bi bi-x-circle-fill"></i></button>
                             </div>
                         </div>
                         

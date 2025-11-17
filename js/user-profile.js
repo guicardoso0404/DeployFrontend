@@ -219,9 +219,9 @@ function displayUserPosts(posts) {
             ` : ''}
             
             <div class="post-stats">
-                <span>❤️ ${post.curtidas || 0} curtidas</span>
-                <span>💬 ${post.comentarios || 0} comentários</span>
-                <span>📅 ${formatDate(post.created_at)}</span>
+                <span><i class="bi bi-heart-fill"></i> ${post.curtidas || 0} curtidas</span>
+                <span><i class="bi bi-chat-left-text-fill"></i> ${post.comentarios || 0} comentários</span>
+                <span><i class="bi bi-calendar-fill"></i> ${formatDate(post.created_at)}</span>
             </div>
         </article>
     `).join('');

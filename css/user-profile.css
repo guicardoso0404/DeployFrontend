@@ -8,6 +8,13 @@
     box-sizing: border-box;
 }
 
+/* Bootstrap Icons - Estilos gerais */
+.bi {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
+}
+
 body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: linear-gradient(135deg, #4D6772 0%, #3a5561 100%);

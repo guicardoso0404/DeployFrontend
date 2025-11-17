@@ -131,11 +131,11 @@ function togglePassword(inputId) {
     if (input && button) {
         if (input.type === 'password') {
             input.type = 'text';
-            button.textContent = '🙈';
+            button.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
             button.setAttribute('title', 'Ocultar senha');
         } else {
             input.type = 'password';
-            button.textContent = '👁️';
+            button.innerHTML = '<i class="bi bi-eye-fill"></i>';
             button.setAttribute('title', 'Mostrar senha');
         }
     }

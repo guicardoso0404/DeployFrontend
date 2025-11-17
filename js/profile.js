@@ -157,8 +157,8 @@ function displayUserPosts(posts) {
             
             <div class="post-meta">
                 <div class="post-stats">
-                    <span>❤️ ${post.curtidas || 0}</span>
-                    <span>💬 ${post.comentarios || 0}</span>
+                    <span><i class="bi bi-heart-fill"></i> ${post.curtidas || 0}</span>
+                    <span><i class="bi bi-chat-left-text-fill"></i> ${post.comentarios || 0}</span>
                 </div>
                 <div class="post-date">
                     ${formatDate(post.created_at)}
@@ -406,11 +406,11 @@ function toggleModalPassword(inputId) {
     if (input && button) {
         if (input.type === 'password') {
             input.type = 'text';
-            button.textContent = '🙈';
+            button.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
             button.setAttribute('title', 'Ocultar senha');
         } else {
             input.type = 'password';
-            button.textContent = '👁️';
+            button.innerHTML = '<i class="bi bi-eye-fill"></i>';
             button.setAttribute('title', 'Mostrar senha');
         }
     }
