@@ -82,9 +82,24 @@ async function handleLogin(event) {
         
         if (data.success) {
             console.log(' Login realizado:', data.data.usuario.nome);
+            console.log(' Foto de perfil recebida:', data.data.usuario.foto_perfil_url || data.data.usuario.foto_perfil || 'nenhuma');
+            
+            // Garantir que a foto de perfil esteja no objeto do usuário
+            const usuario = data.data.usuario;
+            
+            // Se tiver foto_perfil_url, garantir que foto_perfil também tenha
+            if (usuario.foto_perfil_url && !usuario.foto_perfil) {
+                usuario.foto_perfil = usuario.foto_perfil_url;
+            }
+            // Se tiver foto_perfil mas não foto_perfil_url, garantir que foto_perfil_url também tenha
+            if (usuario.foto_perfil && !usuario.foto_perfil_url) {
+                usuario.foto_perfil_url = usuario.foto_perfil;
+            }
+            
+            console.log(' Dados completos do usuário para salvar:', usuario);
             
             // Salvar usuário no localStorage
-            localStorage.setItem('currentUser', JSON.stringify(data.data.usuario));
+            localStorage.setItem('currentUser', JSON.stringify(usuario));
             
             showToast('Login realizado com sucesso!', 'success');
             

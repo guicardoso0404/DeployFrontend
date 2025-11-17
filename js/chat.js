@@ -47,11 +47,20 @@ function setupUserInterface() {
         // Atualizar foto de perfil no header
         const headerUserAvatar = document.getElementById('headerUserAvatar');
         if (headerUserAvatar) {
-            if (currentUser.foto_perfil) {
-                headerUserAvatar.src = currentUser.foto_perfil;
+            const fotoUrl = currentUser.foto_perfil_url || currentUser.foto_perfil;
+            console.log(' Tentando carregar foto de perfil:', fotoUrl);
+            if (fotoUrl) {
+                headerUserAvatar.src = fotoUrl;
                 headerUserAvatar.alt = `Foto de ${currentUser.nome}`;
+                // Adicionar fallback se a imagem falhar ao carregar
+                headerUserAvatar.onerror = function() {
+                    console.warn(' Erro ao carregar foto de perfil, usando padrão');
+                    this.src = '../assets/imagens/Logo.png';
+                    this.onerror = null; // Prevenir loop infinito
+                };
             } else {
                 // Se não tiver foto, usar logo padrão
+                console.log(' Nenhuma foto de perfil encontrada, usando padrão');
                 headerUserAvatar.src = '../assets/imagens/Logo.png';
                 headerUserAvatar.alt = 'Avatar padrão';
             }
@@ -775,7 +784,13 @@ function getUserInfo(userId) {
 function getCurrentUser() {
     try {
         const userStr = localStorage.getItem('currentUser');
-        return userStr ? JSON.parse(userStr) : null;
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            console.log(' Usuário carregado do localStorage:', user.nome);
+            console.log(' Foto de perfil disponível:', user.foto_perfil_url || user.foto_perfil || 'nenhuma');
+            return user;
+        }
+        return null;
     } catch (error) {
         console.error('Erro ao recuperar usuário:', error);
         localStorage.removeItem('currentUser');
