@@ -12,13 +12,13 @@ let allUsers = [];
 let confirmCallback = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 Painel Admin carregando...');
+    console.log('Painel Admin carregando...');
     
     // Verificar se usuário está logado e é admin
     currentUser = getCurrentUser();
     
     if (!currentUser) {
-        console.log('❌ Usuário não logado');
+        console.log('Usuário não logado');
         showToast('Você precisa estar logado para acessar esta página', 'error');
         setTimeout(() => {
             window.location.href = '/login';
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Verificar se é o admin autorizado
     if (currentUser.email !== ADMIN_EMAIL) {
-        console.log('❌ Usuário não autorizado:', currentUser.email);
+        console.log('Usuário não autorizado:', currentUser.email);
         showToast('Você não tem permissão para acessar o painel administrativo', 'error');
         setTimeout(() => {
             window.location.href = '/feed';
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    console.log('✅ Admin autorizado:', currentUser.nome);
+    console.log('Admin autorizado:', currentUser.nome);
     
     // Configurar interface
     setupAdminInterface();
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDashboardStats();
     loadUsers();
     
-    console.log('✅ Painel Admin inicializado!');
+    console.log('Painel Admin inicializado!');
 });
 
 // Obter usuário atual do localStorage
@@ -236,14 +236,14 @@ async function loadDashboardStats() {
             document.getElementById('total-comments').textContent = stats.total_comentarios || 0;
             document.getElementById('total-likes').textContent = stats.total_curtidas || 0;
             
-            console.log('✅ Estatísticas carregadas');
+            console.log('Estatísticas carregadas');
         } else {
-            console.log('❌ Erro ao carregar estatísticas:', data.message);
+            console.log('Erro ao carregar estatísticas:', data.message);
             // Tentar calcular manualmente se a rota não existir
             await loadStatsManually();
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar estatísticas:', error);
+        console.error('Erro ao carregar estatísticas:', error);
         // Tentar calcular manualmente
         await loadStatsManually();
     }
@@ -283,9 +283,9 @@ async function loadStatsManually() {
             document.getElementById('total-likes').textContent = totalLikes;
         }
         
-        console.log('✅ Estatísticas calculadas manualmente');
+        console.log('Estatísticas calculadas manualmente');
     } catch (error) {
-        console.error('❌ Erro ao calcular estatísticas:', error);
+        console.error('Erro ao calcular estatísticas:', error);
     }
 }
 
@@ -294,21 +294,21 @@ async function loadUsers() {
     const usersList = document.getElementById('users-list');
     
     try {
-        console.log('👥 Carregando usuários...');
+        console.log('Carregando usuários...');
         
         const response = await fetch(`${API_BASE_URL}/users`);
         const data = await response.json();
         
         if (data.success) {
             allUsers = data.data || [];
-            console.log('✅ Usuários carregados:', allUsers.length);
+            console.log('Usuários carregados:', allUsers.length);
             renderUsersTable();
         } else {
-            console.log('❌ Erro ao carregar usuários:', data.message);
+            console.log('Erro ao carregar usuários:', data.message);
             usersList.innerHTML = '<tr><td colspan="8" class="loading">Erro ao carregar usuários</td></tr>';
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar usuários:', error);
+        console.error('Erro ao carregar usuários:', error);
         usersList.innerHTML = '<tr><td colspan="8" class="loading">Erro de conexão</td></tr>';
     }
 }
@@ -463,7 +463,7 @@ async function banUser(userId) {
     
     showConfirmModal(`Tem certeza que deseja banir o usuário "${user.nome}"?`, async () => {
         try {
-            console.log('🚫 Banindo usuário:', userId);
+            console.log('Banindo usuário:', userId);
             
             const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
                 method: 'PUT',
@@ -487,7 +487,7 @@ async function banUser(userId) {
                 await banUserFallback(userId);
             }
         } catch (error) {
-            console.error('❌ Erro ao banir usuário:', error);
+            console.error('Erro ao banir usuário:', error);
             await banUserFallback(userId);
         }
     });
@@ -516,7 +516,7 @@ async function banUserFallback(userId) {
             showToast(data.message || 'Erro ao banir usuário', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro no fallback:', error);
+        console.error('Erro no fallback:', error);
         showToast('Erro de conexão', 'error');
     }
 }
@@ -532,7 +532,7 @@ async function unbanUser(userId) {
     
     showConfirmModal(`Tem certeza que deseja desbanir o usuário "${user.nome}"?`, async () => {
         try {
-            console.log('✅ Desbanindo usuário:', userId);
+            console.log('Desbanindo usuário:', userId);
             
             const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
                 method: 'PUT',
@@ -556,7 +556,7 @@ async function unbanUser(userId) {
                 await unbanUserFallback(userId);
             }
         } catch (error) {
-            console.error('❌ Erro ao desbanir usuário:', error);
+            console.error('Erro ao desbanir usuário:', error);
             await unbanUserFallback(userId);
         }
     });
@@ -585,7 +585,7 @@ async function unbanUserFallback(userId) {
             showToast(data.message || 'Erro ao desbanir usuário', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro no fallback:', error);
+        console.error('Erro no fallback:', error);
         showToast('Erro de conexão', 'error');
     }
 }
@@ -595,21 +595,21 @@ async function loadRecentPosts() {
     const postsList = document.getElementById('posts-list');
     
     try {
-        console.log('📝 Carregando posts recentes...');
+        console.log('Carregando posts recentes...');
         
         const response = await fetch(`${API_BASE_URL}/posts/feed`);
         const data = await response.json();
         
         if (data.success) {
             const posts = data.data || [];
-            console.log('✅ Posts carregados:', posts.length);
+            console.log('Posts carregados:', posts.length);
             renderPosts(posts.slice(0, 20)); // Mostrar últimos 20 posts
         } else {
-            console.log('❌ Erro ao carregar posts:', data.message);
+            console.log('Erro ao carregar posts:', data.message);
             postsList.innerHTML = '<p class="loading">Erro ao carregar postagens</p>';
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar posts:', error);
+        console.error('Erro ao carregar posts:', error);
         postsList.innerHTML = '<p class="loading">Erro de conexão</p>';
     }
 }
@@ -660,7 +660,7 @@ function renderPosts(posts) {
 async function deletePost(postId) {
     showConfirmModal('Tem certeza que deseja excluir esta postagem?', async () => {
         try {
-            console.log('🗑️ Deletando post:', postId);
+            console.log('Deletando post:', postId);
             
             const response = await fetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
                 method: 'DELETE',
@@ -682,7 +682,7 @@ async function deletePost(postId) {
                 showToast(data.message || 'Erro ao excluir postagem', 'error');
             }
         } catch (error) {
-            console.error('❌ Erro ao deletar post:', error);
+            console.error('Erro ao deletar post:', error);
             showToast('Erro de conexão', 'error');
         }
     });
