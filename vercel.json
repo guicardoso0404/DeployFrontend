@@ -10,6 +10,8 @@
     { "src": "/user-profile", "dest": "/html/user-profile.html" },
     { "src": "/sobre", "dest": "/html/sobre.html" },
     { "src": "/chat", "dest": "/html/chat.html" },
+    { "src": "/termos-de-uso", "dest": "/html/termos-de-uso.html" },
+    { "src": "/politica-de-privacidade", "dest": "/html/politica-de-privacidade.html" },
     { "src": "/(.*)", "dest": "/html/home.html" }
   ]
 }
