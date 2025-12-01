@@ -234,7 +234,7 @@ body {
 }
 
 .forgot-password a {
-    color: #A7C0BE;
+    color: #4D6772;
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
@@ -242,7 +242,7 @@ body {
 }
 
 .forgot-password a:hover {
-    color: #4D6772;
+    color: #A7C0BE;
     text-decoration: underline;
 }
 
