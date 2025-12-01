@@ -234,15 +234,15 @@ body {
 }
 
 .forgot-password a {
-    color: #4D6772;
-    text-decoration: none;
+    color: #0000EE;
+    text-decoration: underline;
     font-size: 0.9rem;
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
 .forgot-password a:hover {
-    color: #A7C0BE;
+    color: #551A8B;
     text-decoration: underline;
 }
 
@@ -374,14 +374,14 @@ body {
 }
 
 .signup-link {
-    color: #A7C0BE;
-    text-decoration: none;
+    color: #0000EE;
+    text-decoration: underline;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .signup-link:hover {
-    color: #4D6772;
+    color: #551A8B;
     text-decoration: underline;
 }
 
