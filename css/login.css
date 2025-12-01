@@ -234,7 +234,7 @@ body {
 }
 
 .forgot-password a {
-    color: #0000EE;
+    color: #233740;
     text-decoration: underline;
     font-size: 0.9rem;
     font-weight: 500;
@@ -242,7 +242,7 @@ body {
 }
 
 .forgot-password a:hover {
-    color: #551A8B;
+    color: #4D6772;
     text-decoration: underline;
 }
 
@@ -374,14 +374,14 @@ body {
 }
 
 .signup-link {
-    color: #0000EE;
+    color: #233740;
     text-decoration: underline;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .signup-link:hover {
-    color: #551A8B;
+    color: #4D6772;
     text-decoration: underline;
 }
 
@@ -394,8 +394,8 @@ body {
 
 .back-link,
 .guest-link {
-    color: #9CA0A1;
-    text-decoration: none;
+    color: #233740;
+    text-decoration: underline;
     font-size: 0.9rem;
     transition: color 0.3s ease;
 }

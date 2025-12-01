@@ -285,8 +285,8 @@ body {
 }
 
 .terms-link {
-    color: #A7C0BE;
-    text-decoration: none;
+    color: #233740;
+    text-decoration: underline;
     font-weight: 500;
     transition: color 0.3s ease;
 }
@@ -424,8 +424,8 @@ body {
 }
 
 .login-link {
-    color: #A7C0BE;
-    text-decoration: none;
+    color: #233740;
+    text-decoration: underline;
     font-weight: 600;
     transition: color 0.3s ease;
 }
@@ -443,8 +443,8 @@ body {
 }
 
 .back-link {
-    color: #9CA0A1;
-    text-decoration: none;
+    color: #233740;
+    text-decoration: underline;
     font-size: 0.9rem;
     transition: color 0.3s ease;
 }
