@@ -965,6 +965,17 @@ body {
     background: rgba(220, 38, 38, 0.3);
 }
 
+.nav-btn.admin {
+    background: rgba(167, 192, 190, 0.3);
+    border: 1px solid rgba(167, 192, 190, 0.4);
+    color: #A7C0BE;
+}
+
+.nav-btn.admin:hover {
+    background: rgba(167, 192, 190, 0.5);
+    box-shadow: 0 4px 16px rgba(167, 192, 190, 0.3);
+}
+
 .guest-user-area {
     display: flex;
     flex-direction: column;

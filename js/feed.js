@@ -145,6 +145,16 @@ function setupUserMenu() {
         });
     }
     
+    // Configurar botão de admin (apenas para guilherme@networkup.com.br)
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn && currentUser && currentUser.email === 'guilherme@networkup.com.br') {
+        adminBtn.style.display = 'inline-flex';
+        adminBtn.addEventListener('click', function() {
+            console.log(' Redirecionando para painel admin...');
+            window.location.href = '/admin';
+        });
+    }
+    
     // Configurar botão de logout
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
