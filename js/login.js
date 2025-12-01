@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     //     return;
     // }
     
+    // Verificar se tem dados salvos do "Lembrar de mim"
+    loadRememberedCredentials();
+    
     // Configurar formulário de login
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -64,10 +67,12 @@ async function handleLogin(event) {
     const form = event.target;
     const email = form.email.value.trim();
     const senha = form.senha.value;
+    const remember = form.remember.checked;
     const submitButton = form.querySelector('button[type="submit"]');
     
     console.log(' Email:', email);
     console.log(' Senha:', senha ? '***' : 'vazia');
+    console.log(' Lembrar de mim:', remember);
     
     // Validações básicas
     if (!email || !senha) {
@@ -103,6 +108,13 @@ async function handleLogin(event) {
         if (data.success) {
             console.log(' Login realizado:', data.data.usuario.nome);
             console.log(' Foto de perfil recebida:', data.data.usuario.foto_perfil_url || data.data.usuario.foto_perfil || 'nenhuma');
+            
+            // Salvar ou limpar credenciais baseado no "Lembrar de mim"
+            if (remember) {
+                saveRememberedCredentials(email, senha);
+            } else {
+                clearRememberedCredentials();
+            }
             
             // Garantir que a foto de perfil esteja no objeto do usuário
             const usuario = data.data.usuario;
@@ -316,4 +328,48 @@ function showToast(message, type = 'info') {
             }
         }, 300);
     }, 4000);
+}
+
+// Funções para "Lembrar de mim"
+function saveRememberedCredentials(email, senha) {
+    try {
+        // Codificar as credenciais em base64 (não é criptografia forte, mas protege de olhares casuais)
+        const credentials = btoa(JSON.stringify({ email, senha }));
+        localStorage.setItem('rememberedCredentials', credentials);
+        console.log(' Credenciais salvas');
+    } catch (error) {
+        console.error(' Erro ao salvar credenciais:', error);
+    }
+}
+
+function loadRememberedCredentials() {
+    try {
+        const saved = localStorage.getItem('rememberedCredentials');
+        if (saved) {
+            const credentials = JSON.parse(atob(saved));
+            const emailInput = document.getElementById('email');
+            const senhaInput = document.getElementById('senha');
+            const rememberCheckbox = document.getElementById('remember');
+            
+            if (emailInput && credentials.email) {
+                emailInput.value = credentials.email;
+            }
+            if (senhaInput && credentials.senha) {
+                senhaInput.value = credentials.senha;
+            }
+            if (rememberCheckbox) {
+                rememberCheckbox.checked = true;
+            }
+            
+            console.log(' Credenciais carregadas');
+        }
+    } catch (error) {
+        console.error(' Erro ao carregar credenciais:', error);
+        localStorage.removeItem('rememberedCredentials');
+    }
+}
+
+function clearRememberedCredentials() {
+    localStorage.removeItem('rememberedCredentials');
+    console.log(' Credenciais removidas');
 }
