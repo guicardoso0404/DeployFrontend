@@ -12,6 +12,7 @@
     { "src": "/chat", "dest": "/html/chat.html" },
     { "src": "/termos-de-uso", "dest": "/html/termos-de-uso.html" },
     { "src": "/politica-de-privacidade", "dest": "/html/politica-de-privacidade.html" },
+    { "src": "/admin", "dest": "/html/admin.html" },
     { "src": "/(.*)", "dest": "/html/home.html" }
   ]
 }
