@@ -106,8 +106,18 @@ async function handleLogin(event) {
         console.log(' Dados:', data);
         
         if (data.success) {
-            console.log(' Login realizado:', data.data.usuario.nome);
-            console.log(' Foto de perfil recebida:', data.data.usuario.foto_perfil_url || data.data.usuario.foto_perfil || 'nenhuma');
+            const usuario = data.data.usuario;
+            
+            // Verificar se o usuário está banido
+            if (usuario.status === 'banido') {
+                console.log('Usuário banido tentou fazer login:', email);
+                showToast('Sua conta foi banida. Entre em contato com o suporte.', 'error');
+                setButtonLoading(submitButton, false);
+                return;
+            }
+            
+            console.log(' Login realizado:', usuario.nome);
+            console.log(' Foto de perfil recebida:', usuario.foto_perfil_url || usuario.foto_perfil || 'nenhuma');
             
             // Salvar ou limpar credenciais baseado no "Lembrar de mim"
             if (remember) {
@@ -115,9 +125,6 @@ async function handleLogin(event) {
             } else {
                 clearRememberedCredentials();
             }
-            
-            // Garantir que a foto de perfil esteja no objeto do usuário
-            const usuario = data.data.usuario;
             
             // Se tiver foto_perfil_url, garantir que foto_perfil também tenha
             if (usuario.foto_perfil_url && !usuario.foto_perfil) {
