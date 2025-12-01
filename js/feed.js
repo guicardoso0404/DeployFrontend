@@ -6,6 +6,24 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', function() {
     console.log(' Feed carregando...');
     
+    // Verificar se veio do login com Google
+    const urlParams = new URLSearchParams(window.location.search);
+    const authData = urlParams.get('auth');
+
+    if (authData) {
+        try {
+            const userData = JSON.parse(atob(authData));
+            
+            if (userData.success) {
+                localStorage.setItem('currentUser', JSON.stringify(userData.data.usuario));
+                window.history.replaceState({}, document.title, window.location.pathname);
+                console.log(' Login com Google realizado:', userData.data.usuario);
+            }
+        } catch (e) {
+            console.error(' Erro ao processar dados do Google:', e);
+        }
+    }
+    
     // Verificar se usuário está logado (opcional)
     currentUser = getCurrentUser();
     

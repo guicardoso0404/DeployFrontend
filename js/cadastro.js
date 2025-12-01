@@ -38,6 +38,26 @@ document.addEventListener('DOMContentLoaded', function() {
             togglePassword(input.id);
         });
     });
+    
+    // Cadastro com Google
+    const googleBtn = document.querySelector('.btn-google');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log(' Redirecionando para cadastro com Google...');
+            window.location.href = 'https://deploy-back-end-chi.vercel.app/api/auth/google';
+        });
+    }
+    
+    // // Cadastro com LinkedIn
+    // const linkedinBtn = document.querySelector('.btn-linkedin');
+    // if (linkedinBtn) {
+    //     linkedinBtn.addEventListener('click', function(e) {
+    //         e.preventDefault();
+    //         console.log(' Redirecionando para cadastro com LinkedIn...');
+    //         window.location.href = 'https://deploy-back-end-chi.vercel.app/api/auth/linkedin';
+    //     });
+    // }
 });
 
 // Função de cadastro

@@ -34,6 +34,26 @@ document.addEventListener('DOMContentLoaded', function() {
             togglePassword(input.id);
         });
     });
+    
+    // Login com Google
+    const googleBtn = document.querySelector('.btn-google');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log(' Redirecionando para login com Google...');
+            window.location.href = 'https://deploy-back-end-chi.vercel.app/api/auth/google';
+        });
+    }
+    
+    // // Login com LinkedIn
+    // const linkedinBtn = document.querySelector('.btn-linkedin');
+    // if (linkedinBtn) {
+    //     linkedinBtn.addEventListener('click', function(e) {
+    //         e.preventDefault();
+    //         console.log(' Redirecionando para login com LinkedIn...');
+    //         window.location.href = 'https://deploy-back-end-chi.vercel.app/api/auth/linkedin';
+    //     });
+    // }
 });
 
 // Função de login
