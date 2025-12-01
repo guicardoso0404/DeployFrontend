@@ -139,7 +139,7 @@ function setupChatInterface() {
 
 // Inicializar Pusher (substitui Socket.IO)
 function initializePusher() {
-    console.log('🔌 Inicializando Pusher...');
+    console.log('Inicializando Pusher...');
     
     pusher = new Pusher(PUSHER_KEY, {
         cluster: PUSHER_CLUSTER,
