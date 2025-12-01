@@ -215,7 +215,7 @@ function setupPagination() {
 // Carregar estatísticas do dashboard
 async function loadDashboardStats() {
     try {
-        console.log('📊 Carregando estatísticas...');
+        console.log('Carregando estatísticas...');
         
         const response = await fetch(`${API_BASE_URL}/admin/stats`, {
             method: 'GET',
