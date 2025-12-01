@@ -1,21 +1,25 @@
 // 🦟👀
-// Configurações da API1
+// Configurações da API
 const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
+const PUSHER_KEY = 'bcaf21fe53fdcdcdc587';
+const PUSHER_CLUSTER = 'sa1';
+
 let currentUser = null;
-let socket = null;
+let pusher = null;
+let activeChannel = null;
 let activeConversationId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(' Chat carregando...');
+    console.log('Chat carregando...');
     
     // Verificar se usuário está logado
     currentUser = getCurrentUser();
     
     if (currentUser) {
-        console.log(' Usuário logado detectado:', currentUser.nome, currentUser.email);
+        console.log('Usuário logado detectado:', currentUser.nome, currentUser.email);
         setupChatInterface();
     } else {
-        console.log(' Usuário não logado - modo somente visualização');
+        console.log('Usuário não logado - modo somente visualização');
         document.getElementById('guestMessageSection').style.display = 'flex';
         document.getElementById('chatInterface').style.display = 'none';
     }
@@ -23,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar interface comum
     setupUserInterface();
 
-    console.log(' Chat inicializado!');
+    console.log('Chat inicializado!');
 });
 
 // Configurar interface do usuário
@@ -34,7 +38,7 @@ function setupUserInterface() {
     const headerUserEmail = document.getElementById('headerUserEmail');
     
     if (currentUser) {
-        console.log('🔧 Configurando interface para usuário logado:', currentUser.nome);
+        console.log('Configurando interface para usuário logado:', currentUser.nome);
         
         // Mostrar área do usuário logado
         if (loggedUserArea) loggedUserArea.style.display = 'block';
@@ -48,27 +52,23 @@ function setupUserInterface() {
         const headerUserAvatar = document.getElementById('headerUserAvatar');
         if (headerUserAvatar) {
             const fotoUrl = currentUser.foto_perfil_url || currentUser.foto_perfil;
-            console.log(' Tentando carregar foto de perfil:', fotoUrl);
+            console.log('Tentando carregar foto de perfil:', fotoUrl);
             if (fotoUrl) {
                 headerUserAvatar.src = fotoUrl;
                 headerUserAvatar.alt = `Foto de ${currentUser.nome}`;
-                // Adicionar fallback se a imagem falhar ao carregar
                 headerUserAvatar.onerror = function() {
-                    console.warn(' Erro ao carregar foto de perfil, usando padrão');
+                    console.warn('Erro ao carregar foto de perfil, usando padrão');
                     this.src = '../assets/imagens/Logo.png';
-                    this.onerror = null; // Prevenir loop infinito
+                    this.onerror = null;
                 };
             } else {
-                // Se não tiver foto, usar logo padrão
-                console.log(' Nenhuma foto de perfil encontrada, usando padrão');
+                console.log('Nenhuma foto de perfil encontrada, usando padrão');
                 headerUserAvatar.src = '../assets/imagens/Logo.png';
                 headerUserAvatar.alt = 'Avatar padrão';
             }
         }
     } else {
-        console.log(' Configurando interface para visitante');
-        
-        // Mostrar área do visitante
+        console.log('Configurando interface para visitante');
         if (loggedUserArea) loggedUserArea.style.display = 'none';
         if (guestUserArea) guestUserArea.style.display = 'block';
     }
@@ -109,8 +109,8 @@ function setupChatInterface() {
     document.getElementById('guestMessageSection').style.display = 'none';
     document.getElementById('chatInterface').style.display = 'flex';
     
-    // Inicializar socket
-    initializeSocket();
+    // Inicializar Pusher
+    initializePusher();
     
     // Carregar conversas
     loadConversations();
@@ -137,60 +137,64 @@ function setupChatInterface() {
     setupNewChatModal();
 }
 
-// Inicializar Socket.io
-function initializeSocket() {
-    socket = io('http://localhost:3002');
+// Inicializar Pusher (substitui Socket.IO)
+function initializePusher() {
+    console.log('🔌 Inicializando Pusher...');
     
-    socket.on('connect', () => {
-        console.log(' Socket conectado:', socket.id);
-        
-        // Autenticar com o servidor
-        socket.emit('authenticate', { userId: currentUser.id });
+    pusher = new Pusher(PUSHER_KEY, {
+        cluster: PUSHER_CLUSTER,
+        encrypted: true
     });
     
-    socket.on('authenticated', (data) => {
-        if (data.success) {
-            console.log(' Socket autenticado');
-        } else {
-            console.error(' Falha na autenticação do socket');
-        }
+    pusher.connection.bind('connected', () => {
+        console.log('Pusher conectado!');
     });
     
-    socket.on('new_message', (data) => {
-        console.log(' Nova mensagem recebida:', data);
+    pusher.connection.bind('error', (err) => {
+        console.error('Erro de conexão Pusher:', err);
+    });
+}
+
+// Inscrever-se no canal da conversa
+function subscribeToConversation(conversaId) {
+    // Desinscrever do canal anterior se existir
+    if (activeChannel) {
+        pusher.unsubscribe(`chat-${activeConversationId}`);
+    }
+    
+    // Inscrever no novo canal
+    activeChannel = pusher.subscribe(`chat-${conversaId}`);
+    
+    // Escutar novas mensagens
+    activeChannel.bind('nova-mensagem', (data) => {
+        console.log('Nova mensagem recebida via Pusher:', data);
         
-        // Se for da conversa ativa, adicionar à lista de mensagens
-        if (activeConversationId && data.conversaId == activeConversationId) {
-            appendMessage(data.message);
-            
-            // Marcar como lida
-            socket.emit('mark_as_read', { conversaId: activeConversationId });
+        // Só adicionar se não for nossa própria mensagem (já adicionamos otimisticamente)
+        if (data.usuario_id != currentUser.id) {
+            appendMessage(data);
         }
         
         // Atualizar lista de conversas
         loadConversations();
     });
     
-    socket.on('user_typing', (data) => {
-        if (activeConversationId && data.conversaId == activeConversationId) {
-            showTypingIndicator(data.userId);
-        }
-    });
-    
-    socket.on('messages_read', (data) => {
-        // Atualizar status das mensagens
-        if (activeConversationId && data.conversaId == activeConversationId) {
+    // Escutar mensagens lidas
+    activeChannel.bind('mensagens-lidas', (data) => {
+        console.log('Mensagens marcadas como lidas:', data);
+        if (data.lido_por != currentUser.id) {
             updateMessagesStatus('lida');
         }
     });
     
-    socket.on('disconnect', () => {
-        console.log(' Socket desconectado');
+    // Escutar indicador de digitação
+    activeChannel.bind('digitando', (data) => {
+        console.log('Usuário digitando:', data);
+        if (data.usuario_id != currentUser.id) {
+            showTypingIndicator(data.usuario_nome);
+        }
     });
     
-    socket.on('connect_error', (error) => {
-        console.error(' Erro de conexão socket:', error);
-    });
+    console.log(`Inscrito no canal chat-${conversaId}`);
 }
 
 // Carregar conversas do usuário
@@ -205,7 +209,7 @@ async function loadConversations() {
         const data = await response.json();
         
         if (data.success) {
-            console.log(' Conversas carregadas:', data.data.length);
+            console.log('Conversas carregadas:', data.data.length);
             
             if (data.data.length === 0) {
                 conversationsList.innerHTML = '<div class="loading-msg">Nenhuma conversa encontrada</div>';
@@ -219,11 +223,11 @@ async function loadConversations() {
                 conversationsList.appendChild(conversationItem);
             });
         } else {
-            console.log(' Erro ao carregar conversas:', data.message);
+            console.log('Erro ao carregar conversas:', data.message);
             conversationsList.innerHTML = '<div class="loading-msg">Erro ao carregar conversas</div>';
         }
     } catch (error) {
-        console.error(' Erro ao carregar conversas:', error);
+        console.error('Erro ao carregar conversas:', error);
         document.getElementById('conversationsList').innerHTML = 
             '<div class="loading-msg">Erro de conexão</div>';
     }
@@ -235,7 +239,6 @@ function createConversationItem(conversa) {
     conversationItem.className = 'conversation-item';
     conversationItem.dataset.conversaId = conversa.id;
     
-    // Se for a conversa ativa, adicionar classe
     if (activeConversationId && conversa.id == activeConversationId) {
         conversationItem.classList.add('active');
     }
@@ -243,7 +246,6 @@ function createConversationItem(conversa) {
     let avatarHtml = '';
     let nomeExibicao = conversa.nome || 'Conversa';
     
-    // Se for chat individual
     if (conversa.tipo === 'individual' && conversa.outro_usuario) {
         nomeExibicao = conversa.outro_usuario.nome;
         
@@ -265,16 +267,14 @@ function createConversationItem(conversa) {
         if (previewText.length > 30) {
             previewText = previewText.substring(0, 30) + '...';
         }
-        
         timeText = formatDate(conversa.ultima_mensagem.data_envio);
     } else {
         previewText = 'Nenhuma mensagem';
         timeText = formatDate(conversa.data_criacao);
     }
     
-    // Badge de não lidas
     const unreadBadge = conversa.nao_lidas > 0 
-        ? `<span class="unread-badge">${conversa.nao_lidas}</span>` 
+        ? `<span class="unread-badge">${conversa.nao_lidas}</span>`
         : '';
     
     conversationItem.innerHTML = `
@@ -291,7 +291,6 @@ function createConversationItem(conversa) {
         ${unreadBadge}
     `;
     
-    // Adicionar evento de clique
     conversationItem.addEventListener('click', () => {
         loadConversation(conversa.id);
     });
@@ -302,10 +301,12 @@ function createConversationItem(conversa) {
 // Carregar conversa específica
 async function loadConversation(conversaId) {
     try {
-        console.log(' Carregando conversa:', conversaId);
+        console.log('Carregando conversa:', conversaId);
         
-        // Atualizar conversa ativa
         activeConversationId = conversaId;
+        
+        // Inscrever-se no canal Pusher desta conversa
+        subscribeToConversation(conversaId);
         
         // Atualizar UI
         const conversationItems = document.querySelectorAll('.conversation-item');
@@ -325,12 +326,10 @@ async function loadConversation(conversaId) {
         const data = await response.json();
         
         if (data.success) {
-            console.log(' Mensagens carregadas:', data.data.length);
+            console.log('Mensagens carregadas:', data.data.length);
             
-            // Buscar informações da conversa para atualizar cabeçalho
             loadConversationHeader(conversaId);
             
-            // Renderizar mensagens
             const messagesContainer = document.getElementById('messagesContainer');
             messagesContainer.innerHTML = '';
             
@@ -341,60 +340,66 @@ async function loadConversation(conversaId) {
                     </div>
                 `;
             } else {
-                // Mostrar todas as mensagens sem separadores de data
                 data.data.forEach(message => {
                     appendMessage(message, false);
                 });
-                
-                // Rolar para a última mensagem
                 scrollToBottom();
             }
             
-            // Focar no campo de entrada
             document.getElementById('messageInput').focus();
             
             // Marcar mensagens como lidas
-            socket.emit('mark_as_read', { conversaId });
+            markMessagesAsRead(conversaId);
             
-            // Atualizar lista de conversas (para remover badge de não lidas)
             setTimeout(() => {
                 loadConversations();
             }, 500);
         } else {
-            console.log('❌ Erro ao carregar mensagens:', data.message);
+            console.log('Erro ao carregar mensagens:', data.message);
             showToast(data.message, 'error');
         }
     } catch (error) {
-        console.error(' Erro ao carregar conversa:', error);
+        console.error('Erro ao carregar conversa:', error);
         showToast('Erro ao carregar conversa', 'error');
+    }
+}
+
+// Marcar mensagens como lidas via API
+async function markMessagesAsRead(conversaId) {
+    try {
+        await fetch(`${API_BASE_URL}/chat/mensagens/lidas`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                conversaId: conversaId,
+                usuarioId: currentUser.id
+            })
+        });
+    } catch (error) {
+        console.error('Erro ao marcar mensagens como lidas:', error);
     }
 }
 
 // Carregar informações do cabeçalho da conversa
 async function loadConversationHeader(conversaId) {
     try {
-        console.log(' Carregando cabeçalho da conversa:', conversaId);
+        console.log('Carregando cabeçalho da conversa:', conversaId);
         const response = await fetch(`${API_BASE_URL}/chat/conversas/${currentUser.id}`);
         const data = await response.json();
         
         if (data.success) {
-            console.log(' Todas as conversas disponíveis:', data.data);
             const conversa = data.data.find(c => c.id == conversaId);
             
             if (conversa) {
-                console.log(' Conversa selecionada:', conversa);
                 const chatUserName = document.getElementById('chatUserName');
                 const chatUserAvatar = document.getElementById('chatUserAvatar').querySelector('img');
                 
                 let nomeExibicao = conversa.nome || 'Conversa';
                 let avatarSrc = '../assets/imagens/Logo.png';
                 
-                // Se for chat individual
                 if (conversa.tipo === 'individual' && conversa.outro_usuario) {
-                    console.log(' Detalhes completos do outro usuário:', conversa.outro_usuario);
-                    
-                    // Salvar informações do usuário atual do chat para uso no dropdown
-                    // Garantir que o objeto tenha todas as propriedades necessárias
                     currentChatUser = {
                         id: conversa.outro_usuario.id,
                         nome: conversa.outro_usuario.nome,
@@ -402,63 +407,35 @@ async function loadConversationHeader(conversaId) {
                         foto_perfil: conversa.outro_usuario.foto_perfil
                     };
                     
-                    // Verificar e logar informações do usuário para depuração
-                    console.log(' Informações do usuário atual do chat armazenadas:', currentChatUser);
-                    
                     nomeExibicao = conversa.outro_usuario.nome;
                     
                     if (conversa.outro_usuario.foto_perfil) {
                         avatarSrc = conversa.outro_usuario.foto_perfil;
                     }
                 } else {
-                    // Resetar usuário atual se não for chat individual
                     currentChatUser = null;
-                    console.log(' Resetando informações do usuário atual do chat - não é chat individual');
                 }
                 
                 chatUserName.textContent = nomeExibicao;
                 chatUserAvatar.src = avatarSrc;
                 chatUserAvatar.alt = `Avatar de ${nomeExibicao}`;
                 
-                // Configurar dropdown apenas se for chat individual
                 if (conversa.tipo === 'individual') {
                     document.getElementById('chatOptionsBtn').style.display = 'flex';
                 } else {
                     document.getElementById('chatOptionsBtn').style.display = 'none';
                 }
-            } else {
-                console.warn(' Conversa não encontrada:', conversaId);
             }
-        } else {
-            console.error(' Erro ao buscar conversas:', data.message);
         }
     } catch (error) {
-        console.error(' Erro ao carregar cabeçalho da conversa:', error);
+        console.error('Erro ao carregar cabeçalho da conversa:', error);
     }
-}
-
-// Agrupar mensagens por data
-function groupMessagesByDate(messages) {
-    const groups = {};
-    
-    messages.forEach(message => {
-        const date = new Date(message.data_envio).toLocaleDateString();
-        
-        if (!groups[date]) {
-            groups[date] = [];
-        }
-        
-        groups[date].push(message);
-    });
-    
-    return groups;
 }
 
 // Adicionar mensagem à lista
 function appendMessage(message, scroll = true) {
     const messagesContainer = document.getElementById('messagesContainer');
     
-    // Remover mensagem "Nenhuma mensagem ainda" se existir
     const emptyMessage = messagesContainer.querySelector('.empty-messages');
     if (emptyMessage) {
         emptyMessage.remove();
@@ -468,11 +445,9 @@ function appendMessage(message, scroll = true) {
     messageElement.className = 'message';
     messageElement.dataset.messageId = message.id;
     
-    // Verificar se é mensagem enviada ou recebida
     const isSent = message.usuario_id == currentUser.id;
     messageElement.classList.add(isSent ? 'sent' : 'received');
     
-    // Definir avatar
     let avatarHtml = '';
     if (!isSent && message.foto_perfil) {
         avatarHtml = `<div class="message-avatar"><img src="${message.foto_perfil}" alt="Avatar"></div>`;
@@ -480,7 +455,6 @@ function appendMessage(message, scroll = true) {
         const iniciais = message.usuario_nome ? message.usuario_nome.charAt(0).toUpperCase() : 'U';
         avatarHtml = `<div class="message-avatar"><div class="avatar-placeholder">${iniciais}</div></div>`;
     } else if (isSent) {
-        // Avatar do usuário atual para mensagens enviadas
         if (currentUser.foto_perfil) {
             avatarHtml = `<div class="message-avatar"><img src="${currentUser.foto_perfil}" alt="Avatar"></div>`;
         } else {
@@ -496,13 +470,11 @@ function appendMessage(message, scroll = true) {
     
     messagesContainer.appendChild(messageElement);
     
-    // Remover indicador de digitação
     const typingIndicator = document.querySelector('.typing-indicator');
     if (typingIndicator) {
         typingIndicator.remove();
     }
     
-    // Rolar para baixo
     if (scroll) {
         scrollToBottom();
     }
@@ -514,7 +486,7 @@ function scrollToBottom() {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// Enviar mensagem
+// Enviar mensagem via API (Pusher envia em tempo real)
 async function handleSendMessage(event) {
     event.preventDefault();
     
@@ -531,50 +503,63 @@ async function handleSendMessage(event) {
     }
     
     try {
-        console.log(' Enviando mensagem para conversa:', activeConversationId);
+        console.log('Enviando mensagem para conversa:', activeConversationId);
         
-        // Remover mensagem "Nenhuma mensagem ainda" se existir
-        const messagesContainer = document.getElementById('messagesContainer');
-        const emptyMessage = messagesContainer.querySelector('.empty-messages');
-        if (emptyMessage) {
-            emptyMessage.remove();
-        }
-        
-        // Limpar campo
+        // Limpar campo imediatamente
         messageInput.value = '';
         messageInput.focus();
         
-        // Enviar via socket
-        socket.emit('send_message', {
-            conversaId: activeConversationId,
-            conteudo: message
+        // Adicionar mensagem otimisticamente (aparece antes da resposta do servidor)
+        const tempMessage = {
+            id: Date.now(),
+            usuario_id: currentUser.id,
+            usuario_nome: currentUser.nome,
+            foto_perfil: currentUser.foto_perfil,
+            conteudo: message,
+            data_envio: new Date().toISOString(),
+            status: 'enviada'
+        };
+        appendMessage(tempMessage);
+        
+        // Enviar para o servidor
+        const response = await fetch(`${API_BASE_URL}/chat/mensagens/enviar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                conversaId: activeConversationId,
+                usuarioId: currentUser.id,
+                conteudo: message
+            })
         });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Erro ao enviar mensagem:', data.message);
+            showToast('Erro ao enviar mensagem', 'error');
+        }
     } catch (error) {
-        console.error(' Erro ao enviar mensagem:', error);
+        console.error('Erro ao enviar mensagem:', error);
         showToast('Erro ao enviar mensagem', 'error');
     }
 }
 
 // Mostrar indicador de digitação
-function showTypingIndicator(userId) {
-    // Evitar duplicatas
+function showTypingIndicator(userName) {
     const existing = document.querySelector('.typing-indicator');
     if (existing) {
         return;
     }
     
-    // Buscar nome do usuário
-    const userInfo = getUserInfo(userId);
-    const userName = userInfo ? userInfo.nome : 'Alguém';
-    
     const indicator = document.createElement('div');
     indicator.className = 'typing-indicator';
-    indicator.textContent = `${userName} está digitando...`;
+    indicator.textContent = `${userName || 'Alguém'} está digitando...`;
     
     document.getElementById('messagesContainer').appendChild(indicator);
     scrollToBottom();
     
-    // Remover após alguns segundos
     setTimeout(() => {
         const indicator = document.querySelector('.typing-indicator');
         if (indicator) {
@@ -589,9 +574,7 @@ function updateMessagesStatus(status) {
     
     messages.forEach(message => {
         const messageTime = message.querySelector('.message-time');
-        
-        // Adicionar ícone de check
-        if (status === 'lida' && !messageTime.innerHTML.includes('✓')) {
+        if (messageTime && status === 'lida' && !messageTime.innerHTML.includes('✓')) {
             messageTime.innerHTML = messageTime.innerHTML + ' ✓';
         }
     });
@@ -603,19 +586,16 @@ function setupNewChatModal() {
     const closeBtn = modal.querySelector('.close-modal');
     const searchUser = document.getElementById('searchUser');
     
-    // Fechar modal
     closeBtn.addEventListener('click', () => {
         modal.style.display = 'none';
     });
     
-    // Fechar modal ao clicar fora
     window.addEventListener('click', (event) => {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     });
     
-    // Buscar usuários
     let searchTimeout;
     searchUser.addEventListener('input', () => {
         clearTimeout(searchTimeout);
@@ -637,7 +617,6 @@ function setupNewChatModal() {
 function openNewChatModal() {
     const modal = document.getElementById('newChatModal');
     modal.style.display = 'flex';
-    
     document.getElementById('searchUser').value = '';
     document.getElementById('searchUser').focus();
     document.getElementById('userSearchResults').innerHTML = '';
@@ -653,8 +632,6 @@ async function searchUsers(term) {
         const data = await response.json();
         
         if (data.success) {
-            console.log(' Usuários encontrados:', data.data.length);
-            
             if (data.data.length === 0) {
                 searchResults.innerHTML = '<div class="loading-msg">Nenhum usuário encontrado</div>';
                 return;
@@ -691,11 +668,10 @@ async function searchUsers(term) {
                 searchResults.appendChild(userItem);
             });
         } else {
-            console.log('❌ Erro ao buscar usuários:', data.message);
             searchResults.innerHTML = '<div class="loading-msg">Erro ao buscar usuários</div>';
         }
     } catch (error) {
-        console.error('❌ Erro ao buscar usuários:', error);
+        console.error('Erro ao buscar usuários:', error);
         document.getElementById('userSearchResults').innerHTML = 
             '<div class="loading-msg">Erro de conexão</div>';
     }
@@ -704,7 +680,7 @@ async function searchUsers(term) {
 // Criar nova conversa
 async function createConversation(outroUsuarioId) {
     try {
-        console.log('🔄 Criando conversa com usuário:', outroUsuarioId);
+        console.log('Criando conversa com usuário:', outroUsuarioId);
         
         const response = await fetch(`${API_BASE_URL}/chat/conversas/criar`, {
             method: 'POST',
@@ -721,22 +697,18 @@ async function createConversation(outroUsuarioId) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Conversa criada:', data.data.id);
+            console.log('Conversa criada:', data.data.id);
             
-            // Fechar modal
             document.getElementById('newChatModal').style.display = 'none';
             
-            // Recarregar conversas
             await loadConversations();
-            
-            // Abrir conversa
             loadConversation(data.data.id);
         } else {
-            console.log(' Erro ao criar conversa:', data.message);
+            console.log('Erro ao criar conversa:', data.message);
             showToast(data.message, 'error');
         }
     } catch (error) {
-        console.error(' Erro ao criar conversa:', error);
+        console.error('Erro ao criar conversa:', error);
         showToast('Erro ao criar conversa', 'error');
     }
 }
@@ -760,25 +732,33 @@ function filterConversations() {
 
 // Monitorar digitação
 let typingTimeout;
-document.getElementById('messageInput').addEventListener('input', () => {
-    if (!activeConversationId || !socket) {
-        return;
+document.addEventListener('DOMContentLoaded', () => {
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.addEventListener('input', () => {
+            if (!activeConversationId) return;
+            
+            clearTimeout(typingTimeout);
+            
+            // Enviar notificação de digitação via API
+            fetch(`${API_BASE_URL}/chat/digitando`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    conversaId: activeConversationId,
+                    usuarioId: currentUser.id,
+                    usuarioNome: currentUser.nome
+                })
+            }).catch(err => console.log('Erro ao enviar typing:', err));
+            
+            typingTimeout = setTimeout(() => {
+                // Timeout para parar de mostrar "está digitando"
+            }, 2000);
+        });
     }
-    
-    clearTimeout(typingTimeout);
-    
-    socket.emit('typing', { conversaId: activeConversationId });
-    
-    typingTimeout = setTimeout(() => {
-        // Timeout para parar de mostrar "está digitando"
-    }, 2000);
 });
-
-// Obter informações do usuário pelo ID
-function getUserInfo(userId) {
-    // Implementar cache de usuários para melhor performance
-    return { nome: 'Usuário' };
-}
 
 // Utilitários
 function getCurrentUser() {
@@ -786,8 +766,7 @@ function getCurrentUser() {
         const userStr = localStorage.getItem('currentUser');
         if (userStr) {
             const user = JSON.parse(userStr);
-            console.log(' Usuário carregado do localStorage:', user.nome);
-            console.log(' Foto de perfil disponível:', user.foto_perfil_url || user.foto_perfil || 'nenhuma');
+            console.log('Usuário carregado do localStorage:', user.nome);
             return user;
         }
         return null;
@@ -798,29 +777,18 @@ function getCurrentUser() {
     }
 }
 
-// Formatar data para exibição (relativos)
 function formatDate(dateString) {
     try {
-        console.log(' Formatando data relativa, data original:', dateString);
-        
-        // Tentar criar um objeto Date a partir da string
         let date = new Date(dateString);
         
-        // Verificar se a data é válida
         if (isNaN(date.getTime())) {
-            console.log('⚠️ Data inválida para formato relativo, tentando outros formatos');
-            
-            // Tentar formato MySQL YYYY-MM-DD HH:MM:SS
             if (typeof dateString === 'string' && dateString.includes('-')) {
                 const parts = dateString.split(/[- :]/);
                 date = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                console.log(' Data relativa após tentativa alternativa:', date);
             }
         }
         
-        // Se ainda for inválida, retornar um valor padrão
         if (isNaN(date.getTime())) {
-            console.error(' Não foi possível formatar a data relativa:', dateString);
             return 'Agora';
         }
         
@@ -834,103 +802,20 @@ function formatDate(dateString) {
         
         return date.toLocaleDateString('pt-BR');
     } catch (error) {
-        console.error(' Erro ao formatar data relativa:', error);
         return 'Agora';
     }
 }
 
-// Formatar data completa para divisores
-function formatDisplayDate(dateString) {
-    try {
-        console.log(' Formatando data para divisor, data original:', dateString);
-        
-        // Tentar criar um objeto Date a partir da string
-        let date = new Date(dateString);
-        
-        // Verificar se a data é válida
-        if (isNaN(date.getTime())) {
-            console.log(' Data inválida para divisor, tentando outros formatos');
-            
-            // Tentar formato MySQL YYYY-MM-DD HH:MM:SS
-            if (typeof dateString === 'string' && dateString.includes('-')) {
-                const parts = dateString.split(/[- :]/);
-                date = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                console.log(' Data para divisor após tentativa alternativa:', date);
-            }
-        }
-        
-        // Se ainda for inválida, retornar um valor padrão
-        if (isNaN(date.getTime())) {
-            console.error(' Não foi possível formatar a data para divisor:', dateString);
-            return 'Data não disponível';
-        }
-        
-        const now = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(now.getDate() - 1);
-        
-        if (date.toDateString() === now.toDateString()) {
-            return 'Hoje';
-        }
-        
-        if (date.toDateString() === yesterday.toDateString()) {
-            return 'Ontem';
-        }
-        
-        return date.toLocaleDateString('pt-BR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-    } catch (error) {
-        console.error(' Erro ao formatar data para divisor:', error);
-        return 'Data não disponível';
-    }
-}
-
-// Formatar horário
-function formatTime(dateString) {
-    try {
-        console.log(' Formatando horário, data original:', dateString);
-        
-        // Tentar criar um objeto Date a partir da string
-        let date = new Date(dateString);
-        
-        // Verificar se a data é válida
-        if (isNaN(date.getTime())) {
-            console.log(' Data inválida, tentando outros formatos');
-            
-            // Tentar formato MySQL YYYY-MM-DD HH:MM:SS
-            if (typeof dateString === 'string' && dateString.includes('-')) {
-                const parts = dateString.split(/[- :]/);
-                date = new Date(parts[0], parts[1]-1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
-                console.log(' Data após tentativa alternativa:', date);
-            }
-        }
-        
-        // Se ainda for inválida, retornar um valor padrão
-        if (isNaN(date.getTime())) {
-            console.error(' Não foi possível formatar a data:', dateString);
-            return 'Agora';
-        }
-        
-        return date.toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (error) {
-        console.error(' Erro ao formatar horário:', error);
-        return 'Agora';
-    }
-}
-
-// Logout
 function handleLogout() {
     if (confirm('Tem certeza que deseja sair?')) {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('userToken');
         
-        console.log(' Logout realizado');
+        if (pusher) {
+            pusher.disconnect();
+        }
+        
+        console.log('Logout realizado');
         showToast('Logout realizado com sucesso!', 'success');
         
         setTimeout(() => {
@@ -939,7 +824,6 @@ function handleLogout() {
     }
 }
 
-// Toast notifications
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -982,7 +866,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const blockUserBtn = document.getElementById('blockUserBtn');
     const reportBtn = document.getElementById('reportBtn');
     
-    // Abrir/fechar dropdown ao clicar no botão de opções
     if (chatOptionsBtn) {
         chatOptionsBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -990,73 +873,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Fechar dropdown ao clicar em qualquer lugar fora dele
     document.addEventListener('click', function() {
         if (dropdownMenu && dropdownMenu.classList.contains('show')) {
             dropdownMenu.classList.remove('show');
         }
     });
     
-    // Impedir que cliques dentro do dropdown fechem o menu
     if (dropdownMenu) {
         dropdownMenu.addEventListener('click', function(e) {
             e.stopPropagation();
         });
     }
     
-    // Ir para o perfil do usuário
     if (viewProfileBtn) {
         viewProfileBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            console.log(' Tentando navegar para o perfil do usuário, dados disponíveis:', currentChatUser);
-            
             if (currentChatUser && currentChatUser.id) {
-                console.log(' Navegando para o perfil do usuário:', currentChatUser.id);
-                // Navegar para a página de perfil do usuário - usando o parâmetro 'user' em vez de 'id'
                 window.location.href = `/html/user-profile.html?user=${currentChatUser.id}`;
             } else {
-                console.error(' ID do usuário não encontrado para navegação');
                 showToast('Não foi possível encontrar o perfil do usuário', 'error');
             }
             
-            // Fechar o dropdown
             if (dropdownMenu) dropdownMenu.classList.remove('show');
         });
     }
     
-    // Bloquear usuário
     if (blockUserBtn) {
         blockUserBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
             if (currentChatUser && currentChatUser.id) {
                 if (confirm(`Tem certeza que deseja bloquear ${currentChatUser.nome}?`)) {
-                    // Implementar lógica para bloquear o usuário
                     showToast('Função não implementada ainda', 'info');
                 }
             } else {
                 showToast('Não foi possível encontrar o usuário', 'error');
             }
             
-            // Fechar o dropdown
             if (dropdownMenu) dropdownMenu.classList.remove('show');
         });
     }
     
-    // Reportar usuário
     if (reportBtn) {
         reportBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
             if (currentChatUser && currentChatUser.id) {
-                // Implementar lógica para reportar o usuário
                 showToast('Função não implementada ainda', 'info');
             } else {
                 showToast('Não foi possível encontrar o usuário', 'error');
             }
             
-            // Fechar o dropdown
             if (dropdownMenu) dropdownMenu.classList.remove('show');
         });
     }
