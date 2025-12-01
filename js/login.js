@@ -45,15 +45,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // // Login com LinkedIn
-    // const linkedinBtn = document.querySelector('.btn-linkedin');
-    // if (linkedinBtn) {
-    //     linkedinBtn.addEventListener('click', function(e) {
-    //         e.preventDefault();
-    //         console.log(' Redirecionando para login com LinkedIn...');
-    //         window.location.href = 'https://deploy-back-end-chi.vercel.app/api/auth/linkedin';
-    //     });
-    // }
+    // Login com LinkedIn
+    const linkedinBtn = document.querySelector('.btn-linkedin');
+    if (linkedinBtn) {
+        linkedinBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log(' Redirecionando para login com LinkedIn...');
+            window.location.href = 'https://deploy-back-end-chi.vercel.app/api/auth/linkedin';
+        });
+    }
 });
 
 // Função de login
