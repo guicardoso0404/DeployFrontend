@@ -137,7 +137,7 @@ function setupChatInterface() {
     setupNewChatModal();
 }
 
-// Inicializar Pusher (substitui Socket.IO)
+// Inicializar Pusher
 function initializePusher() {
     console.log('Inicializando Pusher...');
     
