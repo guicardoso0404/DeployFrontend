@@ -455,8 +455,10 @@ function appendMessage(message, scroll = true) {
         const iniciais = message.usuario_nome ? message.usuario_nome.charAt(0).toUpperCase() : 'U';
         avatarHtml = `<div class="message-avatar"><div class="avatar-placeholder">${iniciais}</div></div>`;
     } else if (isSent) {
-        if (currentUser.foto_perfil) {
-            avatarHtml = `<div class="message-avatar"><img src="${currentUser.foto_perfil}" alt="Avatar"></div>`;
+        // Tentar foto_perfil_url primeiro, depois foto_perfil
+        const fotoUsuario = currentUser.foto_perfil_url || currentUser.foto_perfil;
+        if (fotoUsuario) {
+            avatarHtml = `<div class="message-avatar"><img src="${fotoUsuario}" alt="Avatar"></div>`;
         } else {
             const iniciais = currentUser.nome ? currentUser.nome.charAt(0).toUpperCase() : 'U';
             avatarHtml = `<div class="message-avatar"><div class="avatar-placeholder">${iniciais}</div></div>`;
@@ -514,7 +516,7 @@ async function handleSendMessage(event) {
             id: Date.now(),
             usuario_id: currentUser.id,
             usuario_nome: currentUser.nome,
-            foto_perfil: currentUser.foto_perfil,
+            foto_perfil: currentUser.foto_perfil_url || currentUser.foto_perfil,
             conteudo: message,
             data_envio: new Date().toISOString(),
             status: 'enviada'
