@@ -52,11 +52,211 @@ body::before {
 .chat-card,
 .home-content,
 .profile-card,
+.profile-main,
+.quick-links,
+.modal-content,
 .user-profile-card,
 .admin-card,
 .side-card {
   background: var(--nu-surface) !important;
   border: 1px solid var(--nu-border) !important;
+}
+
+/* Auth pages (login/cadastro) override */
+.login-container,
+.register-container {
+  background: var(--nu-surface) !important;
+  border: 1px solid var(--nu-border) !important;
+}
+
+.login-left,
+.register-left {
+  background: linear-gradient(135deg, var(--nu-bg-2) 0%, var(--nu-bg-1) 100%) !important;
+  color: var(--nu-text) !important;
+}
+
+.login-right,
+.register-right {
+  background: transparent !important;
+  color: var(--nu-text) !important;
+}
+
+.login-header h2,
+.register-header h2,
+.login-header p,
+.register-header p,
+.feature-item,
+.benefit-content h4,
+.benefit-content p {
+  color: var(--nu-text) !important;
+}
+
+.login-header p,
+.register-header p,
+.benefit-content p {
+  color: var(--nu-muted) !important;
+}
+
+.feature-icon,
+.benefit-icon {
+  background: rgba(127, 182, 230, 0.16) !important;
+  border: 1px solid var(--nu-border) !important;
+}
+
+/* Auth inputs */
+.login-right input,
+.login-right textarea,
+.login-right select,
+.register-right input,
+.register-right textarea,
+.register-right select {
+  background: var(--nu-surface-2) !important;
+  border: 1px solid var(--nu-border) !important;
+}
+
+.login-right label,
+.register-right label {
+  color: var(--nu-muted) !important;
+}
+
+.btn-social {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--nu-border) !important;
+  color: var(--nu-text) !important;
+}
+
+.input-icon,
+.toggle-password {
+  color: var(--nu-muted) !important;
+}
+
+.toggle-password:hover {
+  color: var(--nu-text) !important;
+}
+
+.checkbox-container,
+.terms-section .checkbox-container {
+  color: var(--nu-muted) !important;
+}
+
+.checkbox-container input[type="checkbox"] {
+  accent-color: var(--nu-accent) !important;
+}
+
+a.forgot-password,
+.terms-link,
+.login-link {
+  color: var(--nu-accent-2) !important;
+}
+
+a.forgot-password:hover,
+.terms-link:hover,
+.login-link:hover {
+  color: var(--nu-text) !important;
+}
+
+.form-divider {
+  color: var(--nu-muted) !important;
+}
+
+.form-divider::before {
+  background: linear-gradient(to right, transparent, rgba(230, 238, 248, 0.35), transparent) !important;
+}
+
+/* Profile page override */
+.profile-header {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-bottom: 1px solid var(--nu-border) !important;
+}
+
+.profile-header .logo h1,
+.profile-header .nav-link,
+.profile-header .logout-btn {
+  color: var(--nu-text) !important;
+}
+
+.nav-link {
+  color: var(--nu-muted) !important;
+}
+
+.nav-link.active {
+  background-color: rgba(127, 182, 230, 0.16) !important;
+  color: var(--nu-text) !important;
+}
+
+.profile-container .profile-info h2,
+.profile-container .post-info h4,
+.profile-container .modal-content h3 {
+  color: var(--nu-text) !important;
+}
+
+.profile-container .profile-info p,
+.profile-container .stat-label,
+.profile-container .tab-button {
+  color: var(--nu-muted) !important;
+}
+
+.profile-tabs {
+  border-bottom: 1px solid var(--nu-border) !important;
+}
+
+.tab-button:hover {
+  background-color: rgba(127, 182, 230, 0.12) !important;
+}
+
+.tab-button.active {
+  color: var(--nu-text) !important;
+  background-color: rgba(127, 182, 230, 0.18) !important;
+}
+
+.tab-button.active::after {
+  background: var(--nu-accent) !important;
+}
+
+/* Profile modal + forms */
+.modal {
+  background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+.modal-content {
+  color: var(--nu-text) !important;
+}
+
+.close {
+  color: var(--nu-muted) !important;
+}
+
+.close:hover {
+  color: var(--nu-text) !important;
+}
+
+.form-group label {
+  color: var(--nu-muted) !important;
+}
+
+.form-group input,
+.form-group textarea {
+  background: var(--nu-surface-2) !important;
+  border: 1px solid var(--nu-border) !important;
+  color: var(--nu-text) !important;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: rgba(154, 208, 255, 0.65) !important;
+  box-shadow: 0 0 0 3px rgba(154, 208, 255, 0.14) !important;
+}
+
+.notification.success {
+  background: var(--toast-success) !important;
+}
+
+.notification.info {
+  background: var(--toast-info) !important;
+}
+
+.notification.error {
+  background: var(--toast-error) !important;
 }
 
 /* Inputs */

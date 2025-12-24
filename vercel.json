@@ -8,6 +8,7 @@
     { "src": "/feed", "dest": "/html/feed.html" },
     { "src": "/profile", "dest": "/html/profile.html" },
     { "src": "/user-profile", "dest": "/html/user-profile.html" },
+    { "src": "/users", "dest": "/html/users.html" },
     { "src": "/sobre", "dest": "/html/sobre.html" },
     { "src": "/chat", "dest": "/html/chat.html" },
     { "src": "/termos-de-uso", "dest": "/html/termos-de-uso.html" },
