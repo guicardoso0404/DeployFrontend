@@ -205,7 +205,18 @@ async function loadConversations() {
         
         conversationsList.innerHTML = '<div class="loading-msg">Carregando conversas...</div>';
         
-        const response = await fetch(`${API_BASE_URL}/chat/conversas/${currentUser.id}`);
+        if (!window.Auth?.authFetch) {
+            conversationsList.innerHTML = '<div class="loading-msg">Atualize a página (Auth helper não carregou).</div>';
+            return;
+        }
+
+        const userId = window.Auth.getUserId?.() ?? currentUser?.id;
+        if (!userId) {
+            conversationsList.innerHTML = '<div class="loading-msg">Você precisa estar logado.</div>';
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/chat/conversas/${userId}`);
         const data = await response.json();
         
         if (data.success) {
@@ -322,7 +333,12 @@ async function loadConversation(conversaId) {
         document.getElementById('activeChatState').style.display = 'flex';
         
         // Carregar mensagens
-        const response = await fetch(`${API_BASE_URL}/chat/mensagens/${conversaId}?usuarioId=${currentUser.id}`);
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/chat/mensagens/${conversaId}`);
         const data = await response.json();
         
         if (data.success) {
@@ -367,14 +383,11 @@ async function loadConversation(conversaId) {
 // Marcar mensagens como lidas via API
 async function markMessagesAsRead(conversaId) {
     try {
-        await fetch(`${API_BASE_URL}/chat/mensagens/lidas`, {
+        if (!window.Auth?.authFetch) return;
+        await window.Auth.authFetch(`${API_BASE_URL}/chat/mensagens/lidas`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
-                conversaId: conversaId,
-                usuarioId: currentUser.id
+                conversaId: conversaId
             })
         });
     } catch (error) {
@@ -386,7 +399,10 @@ async function markMessagesAsRead(conversaId) {
 async function loadConversationHeader(conversaId) {
     try {
         console.log('Carregando cabeçalho da conversa:', conversaId);
-        const response = await fetch(`${API_BASE_URL}/chat/conversas/${currentUser.id}`);
+        if (!window.Auth?.authFetch) return;
+        const userId = window.Auth.getUserId?.() ?? currentUser?.id;
+        if (!userId) return;
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/chat/conversas/${userId}`);
         const data = await response.json();
         
         if (data.success) {
@@ -524,14 +540,15 @@ async function handleSendMessage(event) {
         appendMessage(tempMessage);
         
         // Enviar para o servidor
-        const response = await fetch(`${API_BASE_URL}/chat/mensagens/enviar`, {
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/chat/mensagens/enviar`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 conversaId: activeConversationId,
-                usuarioId: currentUser.id,
                 conteudo: message
             })
         });
@@ -630,7 +647,12 @@ async function searchUsers(term) {
         const searchResults = document.getElementById('userSearchResults');
         searchResults.innerHTML = '<div class="loading-msg">Buscando...</div>';
         
-        const response = await fetch(`${API_BASE_URL}/chat/usuarios/buscar?termo=${term}&usuarioId=${currentUser.id}`);
+        if (!window.Auth?.authFetch) {
+            searchResults.innerHTML = '<div class="loading-msg">Atualize a página (Auth helper não carregou).</div>';
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/chat/usuarios/buscar?termo=${encodeURIComponent(term)}`);
         const data = await response.json();
         
         if (data.success) {
@@ -684,13 +706,14 @@ async function createConversation(outroUsuarioId) {
     try {
         console.log('Criando conversa com usuário:', outroUsuarioId);
         
-        const response = await fetch(`${API_BASE_URL}/chat/conversas/criar`, {
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/chat/conversas/criar`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
-                usuarioId: currentUser.id,
                 outroUsuarioId,
                 tipo: 'individual'
             })
@@ -743,17 +766,17 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(typingTimeout);
             
             // Enviar notificação de digitação via API
-            fetch(`${API_BASE_URL}/chat/digitando`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    conversaId: activeConversationId,
-                    usuarioId: currentUser.id,
-                    usuarioNome: currentUser.nome
-                })
-            }).catch(err => console.log('Erro ao enviar typing:', err));
+            const sendTyping = async () => {
+                if (!window.Auth?.authFetch) return;
+                await window.Auth.authFetch(`${API_BASE_URL}/chat/digitando`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        conversaId: activeConversationId,
+                        usuarioNome: currentUser.nome
+                    })
+                });
+            };
+            sendTyping().catch(err => console.log('Erro ao enviar typing:', err));
             
             typingTimeout = setTimeout(() => {
                 // Timeout para parar de mostrar "está digitando"
@@ -810,8 +833,11 @@ function formatDate(dateString) {
 
 function handleLogout() {
     if (confirm('Tem certeza que deseja sair?')) {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userToken');
+        if (window.Auth?.clearAuth) {
+            window.Auth.clearAuth();
+        } else {
+            localStorage.removeItem('currentUser');
+        }
         
         if (pusher) {
             pusher.disconnect();

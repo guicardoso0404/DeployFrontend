@@ -249,7 +249,11 @@ function setupUserMenu() {
             console.log(' Fazendo logout...');
             
             // Limpar dados do usuário
-            localStorage.removeItem('currentUser');
+            if (window.Auth?.clearAuth) {
+                window.Auth.clearAuth();
+            } else {
+                localStorage.removeItem('currentUser');
+            }
             sessionStorage.clear();
             
             // Mostrar mensagem e redirecionar
@@ -293,17 +297,22 @@ async function handleCreatePost(event) {
         
         // Preparar FormData para envio de arquivo
         const formData = new FormData();
-        formData.append('usuario_id', currentUser.id);
         formData.append('conteudo', content);
         
         if (photoInput.files[0]) {
             formData.append('photo', photoInput.files[0]);
         }
         
-        const response = await fetch(`${API_BASE_URL}/posts/postar`, {
-            method: 'POST',
-            body: formData // Não definir Content-Type para FormData
-        });
+        const doAuthFetch = window.Auth?.authFetch;
+        const response = doAuthFetch
+            ? await doAuthFetch(`${API_BASE_URL}/posts/postar`, {
+                method: 'POST',
+                body: formData // Não definir Content-Type para FormData
+            })
+            : await fetch(`${API_BASE_URL}/posts/postar`, {
+                method: 'POST',
+                body: formData
+            });
         
         const data = await response.json();
         
@@ -467,14 +476,15 @@ async function toggleLike(postId) {
     try {
         console.log(' Curtindo postagem:', postId);
         
-        const response = await fetch(`${API_BASE_URL}/posts/curtir`, {
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/curtir`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
-                postagem_id: postId,
-                usuario_id: currentUser.id
+                postagem_id: postId
             })
         });
         
@@ -533,14 +543,15 @@ async function handleAddComment(event, postId) {
     try {
         console.log(' Adicionando comentário na postagem:', postId);
         
-        const response = await fetch(`${API_BASE_URL}/posts/comentar`, {
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/comentar`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 postagem_id: postId,
-                usuario_id: currentUser.id,
                 conteudo: content
             })
         });
@@ -603,14 +614,13 @@ async function deletePost(postId) {
     try {
         console.log(' Deletando postagem:', postId);
         
-        const response = await fetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                usuario_id: currentUser.id
-            })
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
+            method: 'DELETE'
         });
         
         const data = await response.json();
@@ -650,8 +660,11 @@ function updateCharacterCount() {
 // Logout
 function handleLogout() {
     if (confirm('Tem certeza que deseja sair?')) {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userToken');
+        if (window.Auth?.clearAuth) {
+            window.Auth.clearAuth();
+        } else {
+            localStorage.removeItem('currentUser');
+        }
         currentUser = null;
         
         console.log(' Logout realizado');

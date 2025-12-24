@@ -357,7 +357,6 @@ async function handleEditProfile(event) {
     try {
         // Dados para atualizar
         const updateData = {
-            usuario_id: currentUser.id,
             nome: name,
             email: email,
             descricao: description
@@ -368,11 +367,13 @@ async function handleEditProfile(event) {
             updateData.senha = password;
         }
         
-        const response = await fetch(`${API_BASE_URL}/users/update`, {
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/users/update`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(updateData)
         });
         
@@ -419,8 +420,11 @@ function toggleModalPassword(inputId) {
 // Logout
 function logout() {
     if (confirm('Tem certeza que deseja sair?')) {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userToken');
+        if (window.Auth?.clearAuth) {
+            window.Auth.clearAuth();
+        } else {
+            localStorage.removeItem('currentUser');
+        }
         showToast('Logout realizado com sucesso!', 'success');
         setTimeout(() => {
             window.location.href = 'home.html';
@@ -534,9 +538,13 @@ async function handleAvatarUpload(event) {
         // Preparar FormData
         const formData = new FormData();
         formData.append('avatar', file);
-        formData.append('usuario_id', currentUser.id);
-        
-        const response = await fetch(`${API_BASE_URL}/users/upload-avatar`, {
+
+        if (!window.Auth?.authFetch) {
+            showToast('Atualize a página (Auth helper não carregou).', 'error');
+            return;
+        }
+
+        const response = await window.Auth.authFetch(`${API_BASE_URL}/users/upload-avatar`, {
             method: 'POST',
             body: formData
         });

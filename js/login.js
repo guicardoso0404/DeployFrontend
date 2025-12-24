@@ -6,6 +6,28 @@ console.log(' Login.js carregado!');
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log(' DOM carregado - configurando login');
+
+    // OAuth callback (Google/LinkedIn): backend redirects with ?auth=<base64>
+    try {
+        const authParam = new URLSearchParams(window.location.search).get('auth');
+        if (authParam && window.Auth?.decodeAuthQueryPayload) {
+            const payload = window.Auth.decodeAuthQueryPayload(authParam);
+            const accessToken = payload?.data?.accessToken;
+            const usuario = payload?.data?.usuario;
+            const userId = typeof usuario?.id === 'number' ? usuario.id : null;
+
+            if (accessToken && userId) {
+                window.Auth.setAuth({ accessToken, userId, usuario });
+                showToast('Login realizado com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.replace('/feed');
+                }, 600);
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn('Falha ao processar callback OAuth:', e);
+    }
     
     // COMENTADO PARA PERMITIR ACESSO SEMPRE:
     // const currentUser = getCurrentUser();
@@ -107,6 +129,7 @@ async function handleLogin(event) {
         
         if (data.success) {
             const usuario = data.data.usuario;
+            const accessToken = data.data.accessToken;
             
             // Verificar se o usuário está banido
             if (usuario.status === 'banido') {
@@ -136,9 +159,14 @@ async function handleLogin(event) {
             }
             
             console.log(' Dados completos do usuário para salvar:', usuario);
-            
-            // Salvar usuário no localStorage
-            localStorage.setItem('currentUser', JSON.stringify(usuario));
+
+            // Salvar sessão (token + userId + currentUser)
+            if (accessToken && window.Auth?.setAuth) {
+                window.Auth.setAuth({ accessToken, userId: usuario.id, usuario });
+            } else {
+                // fallback para compatibilidade (caso api.js não carregue)
+                localStorage.setItem('currentUser', JSON.stringify(usuario));
+            }
             
             showToast('Login realizado com sucesso!', 'success');
             

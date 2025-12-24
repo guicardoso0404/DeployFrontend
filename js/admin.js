@@ -216,13 +216,16 @@ function setupPagination() {
 async function loadDashboardStats() {
     try {
         console.log('Carregando estatísticas...');
-        
-        const response = await fetch(`${API_BASE_URL}/admin/stats`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+
+        const doAuthFetch = window.Auth?.authFetch;
+        const response = doAuthFetch
+            ? await doAuthFetch(`${API_BASE_URL}/admin/stats`, { method: 'GET' })
+            : await fetch(`${API_BASE_URL}/admin/stats`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
         
         const data = await response.json();
         
@@ -464,14 +467,15 @@ async function banUser(userId) {
     showConfirmModal(`Tem certeza que deseja banir o usuário "${user.nome}"?`, async () => {
         try {
             console.log('Banindo usuário:', userId);
-            
-            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
+
+            if (!window.Auth?.authFetch) {
+                showToast('Atualize a página (Auth helper não carregou).', 'error');
+                return;
+            }
+
+            const response = await window.Auth.authFetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({
-                    admin_id: currentUser.id,
                     status: 'banido'
                 })
             });
@@ -496,7 +500,15 @@ async function banUser(userId) {
 // Fallback para banir usuário
 async function banUserFallback(userId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        const doAuthFetch = window.Auth?.authFetch;
+        const response = doAuthFetch
+            ? await doAuthFetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    status: 'banido'
+                })
+            })
+            : await fetch(`${API_BASE_URL}/users/${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -504,7 +516,7 @@ async function banUserFallback(userId) {
             body: JSON.stringify({
                 status: 'banido'
             })
-        });
+            });
         
         const data = await response.json();
         
@@ -533,14 +545,15 @@ async function unbanUser(userId) {
     showConfirmModal(`Tem certeza que deseja desbanir o usuário "${user.nome}"?`, async () => {
         try {
             console.log('Desbanindo usuário:', userId);
-            
-            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
+
+            if (!window.Auth?.authFetch) {
+                showToast('Atualize a página (Auth helper não carregou).', 'error');
+                return;
+            }
+
+            const response = await window.Auth.authFetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({
-                    admin_id: currentUser.id,
                     status: 'ativo'
                 })
             });
@@ -565,7 +578,15 @@ async function unbanUser(userId) {
 // Fallback para desbanir usuário
 async function unbanUserFallback(userId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        const doAuthFetch = window.Auth?.authFetch;
+        const response = doAuthFetch
+            ? await doAuthFetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    status: 'ativo'
+                })
+            })
+            : await fetch(`${API_BASE_URL}/users/${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -573,7 +594,7 @@ async function unbanUserFallback(userId) {
             body: JSON.stringify({
                 status: 'ativo'
             })
-        });
+            });
         
         const data = await response.json();
         
@@ -661,15 +682,14 @@ async function deletePost(postId) {
     showConfirmModal('Tem certeza que deseja excluir esta postagem?', async () => {
         try {
             console.log('Deletando post:', postId);
-            
-            const response = await fetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    usuario_id: currentUser.id
-                })
+
+            if (!window.Auth?.authFetch) {
+                showToast('Atualize a página (Auth helper não carregou).', 'error');
+                return;
+            }
+
+            const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
+                method: 'DELETE'
             });
             
             const data = await response.json();
@@ -700,8 +720,11 @@ function showConfirmModal(message, callback) {
 
 // Logout
 function handleLogout() {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('userToken');
+    if (window.Auth?.clearAuth) {
+        window.Auth.clearAuth();
+    } else {
+        localStorage.removeItem('currentUser');
+    }
     
     showToast('Logout realizado com sucesso!', 'success');
     

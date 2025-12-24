@@ -3,10 +3,27 @@
 const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
 
 document.addEventListener('DOMContentLoaded', function() {
-    // FORÇAR LIMPEZA COMPLETA PARA DEBUG
-    console.log(' Limpando localStorage para debug...');
-    localStorage.clear();
-    sessionStorage.clear();
+    // OAuth callback (Google/LinkedIn): backend redirects with ?auth=<base64>
+    try {
+        const authParam = new URLSearchParams(window.location.search).get('auth');
+        if (authParam && window.Auth?.decodeAuthQueryPayload) {
+            const payload = window.Auth.decodeAuthQueryPayload(authParam);
+            const accessToken = payload?.data?.accessToken;
+            const usuario = payload?.data?.usuario;
+            const userId = typeof usuario?.id === 'number' ? usuario.id : null;
+
+            if (accessToken && userId) {
+                window.Auth.setAuth({ accessToken, userId, usuario });
+                showToast('Login realizado com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.replace('/feed');
+                }, 600);
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn('Falha ao processar callback OAuth:', e);
+    }
     
     // Aguardar um pouco antes de verificar usuário
     setTimeout(() => {
@@ -136,9 +153,16 @@ async function handleRegister(event) {
                 if (loginResult.success) {
                     console.log(' Login automático realizado!');
                     console.log(' Usuário logado:', loginResult.data.usuario);
+
+                    const accessToken = loginResult.data.accessToken;
+                    const usuario = loginResult.data.usuario;
                     
-                    // Salvar dados do usuário no localStorage
-                    localStorage.setItem('currentUser', JSON.stringify(loginResult.data.usuario));
+                    // Salvar sessão (token + userId + currentUser)
+                    if (accessToken && window.Auth?.setAuth) {
+                        window.Auth.setAuth({ accessToken, userId: usuario.id, usuario });
+                    } else {
+                        localStorage.setItem('currentUser', JSON.stringify(usuario));
+                    }
                     
                     showToast('Bem-vindo! Redirecionando para o feed...', 'success');
                     
