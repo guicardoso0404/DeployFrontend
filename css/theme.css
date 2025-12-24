@@ -125,6 +125,15 @@ body::before {
   color: var(--nu-text) !important;
 }
 
+.btn-social:hover {
+  border-color: rgba(154, 208, 255, 0.55) !important;
+  background: rgba(127, 182, 230, 0.14) !important;
+}
+
+.btn-social:active {
+  background: rgba(127, 182, 230, 0.20) !important;
+}
+
 .input-icon,
 .toggle-password {
   color: var(--nu-muted) !important;
@@ -149,18 +158,77 @@ a.forgot-password,
   color: var(--nu-accent-2) !important;
 }
 
+.signup-link,
+.back-link,
+.guest-link {
+  color: var(--nu-text) !important;
+  text-decoration-color: rgba(230, 238, 248, 0.6) !important;
+}
+
 a.forgot-password:hover,
 .terms-link:hover,
 .login-link:hover {
   color: var(--nu-text) !important;
 }
 
+.signup-link:hover,
+.back-link:hover,
+.guest-link:hover {
+  color: var(--nu-accent-2) !important;
+}
+
 .form-divider {
   color: var(--nu-muted) !important;
 }
 
+.form-divider span {
+  background: transparent !important;
+}
+
 .form-divider::before {
   background: linear-gradient(to right, transparent, rgba(230, 238, 248, 0.35), transparent) !important;
+}
+
+.login-footer p,
+.register-footer p {
+  color: var(--nu-muted) !important;
+}
+
+/* Termos & Privacidade */
+.terms-header,
+.terms-card {
+  background: var(--nu-surface) !important;
+  border: 1px solid var(--nu-border) !important;
+}
+
+.terms-header .logo a,
+.terms-header .logo h1,
+.header-nav .back-link {
+  color: var(--nu-text) !important;
+}
+
+.terms-card h1,
+.terms-section h2,
+.terms-section h3 {
+  color: var(--nu-text) !important;
+}
+
+.terms-section p,
+.terms-section ul li,
+.last-update {
+  color: var(--nu-muted) !important;
+}
+
+.terms-section h2 {
+  border-bottom-color: rgba(154, 208, 255, 0.55) !important;
+}
+
+.terms-section ul li strong {
+  color: var(--nu-text) !important;
+}
+
+.terms-footer {
+  border-top-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Profile page override */
