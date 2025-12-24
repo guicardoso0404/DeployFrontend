@@ -136,11 +136,17 @@ body::before {
 
 .input-icon,
 .toggle-password {
-  color: var(--nu-muted) !important;
+  color: var(--nu-accent-2) !important;
 }
 
 .toggle-password:hover {
   color: var(--nu-text) !important;
+}
+
+/* Make sure the actual <i> icon inherits the intended color */
+.input-icon i,
+.toggle-password i {
+  color: inherit !important;
 }
 
 .checkbox-container,
