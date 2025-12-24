@@ -8,8 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const authParam = new URLSearchParams(window.location.search).get('auth');
         if (authParam && window.Auth?.decodeAuthQueryPayload) {
             const payload = window.Auth.decodeAuthQueryPayload(authParam);
-            const accessToken = payload?.data?.accessToken;
-            const usuario = payload?.data?.usuario;
+
+            const data = payload?.data || payload;
+            const accessToken = data?.accessToken || payload?.accessToken;
+            const usuario = data?.usuario || data?.user || payload?.usuario || payload?.user;
             const userId = typeof usuario?.id === 'number' ? usuario.id : null;
 
             if (accessToken && userId) {

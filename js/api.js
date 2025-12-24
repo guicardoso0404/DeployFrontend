@@ -11,10 +11,23 @@
     return Number.isFinite(parsed) ? parsed : null;
   };
 
+  const normalizeUsuario = (usuario) => {
+    if (!usuario || typeof usuario !== 'object') return usuario;
+
+    // Some flows return only one of these fields; the UI uses both across pages.
+    const fotoPerfilUrl = usuario.foto_perfil_url || usuario.foto_perfilUrl;
+    const fotoPerfil = usuario.foto_perfil;
+
+    if (fotoPerfilUrl && !fotoPerfil) usuario.foto_perfil = fotoPerfilUrl;
+    if (fotoPerfil && !usuario.foto_perfil_url) usuario.foto_perfil_url = fotoPerfil;
+
+    return usuario;
+  };
+
   const setAuth = ({ accessToken, userId, usuario }) => {
     if (accessToken) localStorage.setItem(TOKEN_KEY, accessToken);
     if (typeof userId === 'number') localStorage.setItem(USER_ID_KEY, String(userId));
-    if (usuario) localStorage.setItem(USER_KEY, JSON.stringify(usuario));
+    if (usuario) localStorage.setItem(USER_KEY, JSON.stringify(normalizeUsuario(usuario)));
   };
 
   const clearAuth = () => {
