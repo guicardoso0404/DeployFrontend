@@ -12,23 +12,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (authData) {
         try {
-            if (window.Auth?.decodeAuthQueryPayload && window.Auth?.setAuth) {
+            const persistUsuarioOnly = (usuario) => {
+                if (!usuario) return;
+
+                // Normalizar foto para os campos esperados no frontend
+                const rawPhoto = (
+                    usuario.foto_perfil_url ||
+                    usuario.foto_perfil ||
+                    usuario.foto_perfilUrl ||
+                    usuario.fotoPerfil ||
+                    usuario.avatar_url ||
+                    usuario.avatarUrl ||
+                    usuario.avatar ||
+                    usuario.picture ||
+                    usuario.pictureUrl ||
+                    usuario.profile_picture ||
+                    usuario.profilePicture ||
+                    usuario.photo ||
+                    usuario.photoUrl ||
+                    usuario.imagem_url ||
+                    usuario.imagemUrl ||
+                    usuario.imagem ||
+                    ''
+                );
+                const photo = typeof rawPhoto === 'string' ? rawPhoto.trim() : '';
+                if (photo) {
+                    const fixed = photo.startsWith('http://')
+                        ? `https://${photo.slice('http://'.length)}`
+                        : (photo.startsWith('//') ? `https:${photo}` : photo);
+                    if (!usuario.foto_perfil) usuario.foto_perfil = fixed;
+                    if (!usuario.foto_perfil_url) usuario.foto_perfil_url = fixed;
+                }
+
+                localStorage.setItem('currentUser', JSON.stringify(usuario));
+                if (usuario.id != null) {
+                    localStorage.setItem('userId', String(usuario.id));
+                }
+            };
+
+            if (window.Auth?.decodeAuthQueryPayload) {
                 const payload = window.Auth.decodeAuthQueryPayload(authData);
                 const data = payload?.data || payload;
                 const accessToken = data?.accessToken;
                 const usuario = data?.usuario;
                 const userId = usuario?.id;
 
-                if (payload?.success && accessToken && userId) {
-                    window.Auth.setAuth({ accessToken, userId, usuario });
+                if (payload?.success && usuario) {
+                    // Se vier token, preferir fluxo novo (salva token + normaliza usuário)
+                    if (accessToken && userId && window.Auth?.setAuth) {
+                        window.Auth.setAuth({ accessToken, userId, usuario });
+                    } else {
+                        // Alguns redirects enviam só o usuário (sem token)
+                        persistUsuarioOnly(usuario);
+                    }
+
                     window.history.replaceState({}, document.title, window.location.pathname);
                     console.log(' Login OAuth realizado:', usuario);
+                } else {
+                    console.warn(' OAuth recebido, mas payload inválido:', payload);
                 }
             } else {
                 // Fallback (legado): mantém compatibilidade caso o helper não esteja carregado.
                 const userData = JSON.parse(atob(authData));
-                if (userData.success) {
-                    localStorage.setItem('currentUser', JSON.stringify(userData.data.usuario));
+                if (userData.success && userData.data?.usuario) {
+                    persistUsuarioOnly(userData.data.usuario);
                     window.history.replaceState({}, document.title, window.location.pathname);
                     console.log(' Login OAuth realizado (fallback):', userData.data.usuario);
                 }
