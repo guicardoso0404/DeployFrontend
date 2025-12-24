@@ -11,15 +11,52 @@
     return Number.isFinite(parsed) ? parsed : null;
   };
 
+  const normalizePhotoUrl = (url) => {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+
+    // Avoid mixed-content blocks when app runs on HTTPS
+    if (trimmed.startsWith('http://')) return `https://${trimmed.slice('http://'.length)}`;
+    if (trimmed.startsWith('//')) return `https:${trimmed}`;
+    return trimmed;
+  };
+
+  const pickFirstString = (...values) => {
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim()) return value;
+    }
+    return '';
+  };
+
   const normalizeUsuario = (usuario) => {
     if (!usuario || typeof usuario !== 'object') return usuario;
 
-    // Some flows return only one of these fields; the UI uses both across pages.
-    const fotoPerfilUrl = usuario.foto_perfil_url || usuario.foto_perfilUrl;
-    const fotoPerfil = usuario.foto_perfil;
+    // Some flows return only one of these fields; other providers use different names.
+    const rawPhoto = pickFirstString(
+      usuario.foto_perfil_url,
+      usuario.foto_perfilUrl,
+      usuario.foto_perfil,
+      usuario.fotoPerfil,
+      usuario.avatar_url,
+      usuario.avatarUrl,
+      usuario.avatar,
+      usuario.picture,
+      usuario.pictureUrl,
+      usuario.profile_picture,
+      usuario.profilePicture,
+      usuario.photo,
+      usuario.photoUrl,
+      usuario.imagem_url,
+      usuario.imagemUrl,
+      usuario.imagem
+    );
 
-    if (fotoPerfilUrl && !fotoPerfil) usuario.foto_perfil = fotoPerfilUrl;
-    if (fotoPerfil && !usuario.foto_perfil_url) usuario.foto_perfil_url = fotoPerfil;
+    const photoUrl = normalizePhotoUrl(rawPhoto);
+    if (photoUrl) {
+      if (!usuario.foto_perfil) usuario.foto_perfil = photoUrl;
+      if (!usuario.foto_perfil_url) usuario.foto_perfil_url = photoUrl;
+    }
 
     return usuario;
   };
@@ -38,8 +75,13 @@
   };
 
   const normalizeBase64 = (input) => {
-    // Support URL-safe base64 and missing padding
-    const value = String(input).replace(/-/g, '+').replace(/_/g, '/');
+    // Support URL-safe base64 and missing padding.
+    // Also handle '+' being converted to spaces by querystring parsing.
+    const value = String(input)
+      .trim()
+      .replace(/ /g, '+')
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
     const padLength = (4 - (value.length % 4)) % 4;
     return value + '='.repeat(padLength);
   };

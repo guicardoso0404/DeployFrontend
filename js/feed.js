@@ -6,21 +6,35 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', function() {
     console.log(' Feed carregando...');
     
-    // Verificar se veio do login com Google
+    // Verificar se veio do login OAuth (Google/LinkedIn)
     const urlParams = new URLSearchParams(window.location.search);
     const authData = urlParams.get('auth');
 
     if (authData) {
         try {
-            const userData = JSON.parse(atob(authData));
-            
-            if (userData.success) {
-                localStorage.setItem('currentUser', JSON.stringify(userData.data.usuario));
-                window.history.replaceState({}, document.title, window.location.pathname);
-                console.log(' Login com Google realizado:', userData.data.usuario);
+            if (window.Auth?.decodeAuthQueryPayload && window.Auth?.setAuth) {
+                const payload = window.Auth.decodeAuthQueryPayload(authData);
+                const data = payload?.data || payload;
+                const accessToken = data?.accessToken;
+                const usuario = data?.usuario;
+                const userId = usuario?.id;
+
+                if (payload?.success && accessToken && userId) {
+                    window.Auth.setAuth({ accessToken, userId, usuario });
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    console.log(' Login OAuth realizado:', usuario);
+                }
+            } else {
+                // Fallback (legado): mantém compatibilidade caso o helper não esteja carregado.
+                const userData = JSON.parse(atob(authData));
+                if (userData.success) {
+                    localStorage.setItem('currentUser', JSON.stringify(userData.data.usuario));
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    console.log(' Login OAuth realizado (fallback):', userData.data.usuario);
+                }
             }
         } catch (e) {
-            console.error(' Erro ao processar dados do Google:', e);
+            console.error(' Erro ao processar dados do OAuth:', e);
         }
     }
     
