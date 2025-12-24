@@ -10,6 +10,11 @@
     --light-bg: rgba(255, 255, 255, 0.05);
     --border-color: rgba(167, 192, 190, 0.3);
     --hover-color: rgba(167, 192, 190, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.10);
+    --glass-bg-2: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(167, 192, 190, 0.22);
+    --surface: rgba(77, 103, 114, 0.22);
+    --surface-2: rgba(77, 103, 114, 0.16);
     --error-color: #dc2626;
     --success-color: #10b981;
     --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -57,6 +62,17 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     overflow-y: auto; /* Permitir scroll vertical */
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(215, 212, 204, 0.06) 0%, transparent 55%),
+        radial-gradient(circle at 85% 80%, rgba(167, 192, 190, 0.10) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 a {
@@ -270,15 +286,15 @@ button {
 
 /* ÁREA PRINCIPAL DE CHAT */
 .chat-container {
-    max-width: 1200px;
-    margin: 1rem auto 3rem auto; /* Aumentei mais a margem inferior */
-    background: rgba(77, 103, 114, 0.2);
+    max-width: 1280px;
+    margin: 1.25rem auto 3rem auto; /* Aumentei mais a margem inferior */
+    background: var(--glass-bg);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(167, 192, 190, 0.3);
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
     overflow: hidden;
-    height: 80vh; /* Reduzi um pouco para 80% da altura da viewport */
+    height: 78vh; /* mais próximo do frame da referência */
     min-height: 500px; /* Altura mínima */
     display: flex;
     flex-direction: column;
@@ -327,32 +343,32 @@ button {
 .chat-interface {
     display: flex;
     height: 100%;
-    background: rgba(77, 103, 114, 0.2);
+    background: var(--surface-2);
     backdrop-filter: blur(10px);
     overflow: hidden;
 }
 
 /* Sidebar com lista de conversas */
 .conversations-sidebar {
-    width: 220px;
-    min-width: 160px;
-    max-width: 260px;
-    border-right: 1px solid rgba(167, 192, 190, 0.3);
+    width: 340px;
+    min-width: 260px;
+    max-width: 380px;
+    border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    background: rgba(77, 103, 114, 0.2);
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(10px);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    padding: 0 0.2rem;
+    padding: 0 0.5rem;
 }
 
 .conversations-header {
     padding: 0.7rem;
-    border-bottom: 1px solid rgba(167, 192, 190, 0.3);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(77, 103, 114, 0.3);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .conversations-header h2 {
@@ -385,15 +401,15 @@ button {
 
 .search-container {
     padding: 0.5rem;
-    border-bottom: 1px solid rgba(167, 192, 190, 0.3);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 #searchConversation {
     width: 100%;
     padding: 0.6rem 0.8rem;
-    border: 1px solid rgba(167, 192, 190, 0.3);
+    border: 1px solid rgba(167, 192, 190, 0.25);
     border-radius: var(--radius-md);
-    background: rgba(77, 103, 114, 0.3);
+    background: rgba(77, 103, 114, 0.20);
     color: #D7D4CC;
     font-size: 0.85rem;
     transition: var(--transition);
@@ -418,7 +434,7 @@ button {
 
 /* Item de conversa */
 .conversation-item {
-    padding: 0.6rem;
+    padding: 0.75rem;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
@@ -427,8 +443,8 @@ button {
     transition: var(--transition);
     margin-bottom: 0.5rem;
     position: relative;
-    background: rgba(77, 103, 114, 0.3);
-    border: 1px solid rgba(167, 192, 190, 0.1);
+    background: rgba(77, 103, 114, 0.22);
+    border: 1px solid rgba(167, 192, 190, 0.16);
     backdrop-filter: blur(10px);
 }
 
@@ -440,9 +456,9 @@ button {
 }
 
 .conversation-item.active {
-    background: rgba(167, 192, 190, 0.2);
-    border-color: rgba(167, 192, 190, 0.5);
-    box-shadow: 0 0 0 2px rgba(167, 192, 190, 0.3);
+    background: rgba(167, 192, 190, 0.14);
+    border-color: rgba(167, 192, 190, 0.38);
+    box-shadow: 0 0 0 2px rgba(167, 192, 190, 0.18);
 }
 
 .conversation-avatar {
@@ -535,7 +551,7 @@ button {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(77, 103, 114, 0.3);
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(10px);
     height: 100%;
     overflow: hidden; /* Prevent scrolling at this level */
@@ -604,11 +620,11 @@ button {
 
 .chat-header {
     padding: 0.6rem 1rem;
-    border-bottom: 1px solid rgba(167, 192, 190, 0.3);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(77, 103, 114, 0.3);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .chat-user-info {
@@ -749,7 +765,7 @@ button {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    background-color: rgba(77, 103, 114, 0.1);
+    background-color: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(5px);
     scroll-behavior: smooth;
     height: calc(100% - 120px); /* Altura relativa ao container pai */
@@ -779,14 +795,14 @@ button {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     margin-bottom: 0.8rem;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(167, 192, 190, 0.3);
+    border: 1px solid rgba(167, 192, 190, 0.22);
     animation: fadeIn 0.3s ease;
     font-size: 0.95rem;
 }
 
 .message.received {
     align-self: flex-start;
-    background: rgba(77, 103, 114, 0.5);
+    background: rgba(77, 103, 114, 0.44);
     color: #D7D4CC;
     border-bottom-left-radius: 4px;
     margin-left: 12px;
@@ -795,7 +811,7 @@ button {
 
 .message.sent {
     align-self: flex-end;
-    background: rgba(167, 192, 190, 0.5);
+    background: rgba(167, 192, 190, 0.42);
     color: #4D6772;
     border-bottom-right-radius: 4px;
     margin-right: 12px;

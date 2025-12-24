@@ -10,6 +10,7 @@
     <title>Feed - NetworkUp</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../css/feed.css">
+    <link rel="stylesheet" href="../css/theme.css">
     <link rel="icon" href="../assets/imagens/Logo.png">
     <meta name="description" content="Feed - NetworkUp - Conectando microempresas de tecnologia do RS">
 </head>
@@ -56,60 +57,92 @@
 
     <main class="main-content">
         <div class="container">
-            <!-- Seção para criar nova postagem (apenas usuários logados) -->
-            <section class="create-post-section" id="createPostSection" style="display: none;">
-                <div class="create-post-card">
-                    <h2>O que você está pensando?</h2>
-                    <form id="createPostForm" class="create-post-form">
-                        <textarea 
-                            id="postContent" 
-                            name="content" 
-                            placeholder="Compartilhe suas ideias com a comunidade..." 
-                            rows="3"
-                            maxlength="500"
-                        ></textarea>
-                        
-                        <!-- Área para anexar fotos -->
-                        <div class="photo-upload-section">
-                            <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
-                            <button type="button" class="photo-btn" onclick="document.getElementById('photoInput').click()">
-                                <i class="bi bi-camera-fill"></i> Adicionar Foto
-                            </button>
-                            <div id="photoPreview" class="photo-preview" style="display: none;">
-                                <img id="previewImage" src="" alt="Preview">
-                                <button type="button" class="remove-photo" onclick="removePhoto()"><i class="bi bi-x-circle-fill"></i></button>
+            <div class="feed-layout">
+                <div class="feed-main">
+                    <!-- Seção para criar nova postagem (apenas usuários logados) -->
+                    <section class="create-post-section" id="createPostSection" style="display: none;">
+                        <div class="create-post-card">
+                            <h2>O que você está pensando?</h2>
+                            <form id="createPostForm" class="create-post-form">
+                                <textarea 
+                                    id="postContent" 
+                                    name="content" 
+                                    placeholder="Compartilhe suas ideias com a comunidade..." 
+                                    rows="3"
+                                    maxlength="500"
+                                ></textarea>
+                                
+                                <!-- Área para anexar fotos -->
+                                <div class="photo-upload-section">
+                                    <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
+                                    <button type="button" class="photo-btn" onclick="document.getElementById('photoInput').click()">
+                                        <i class="bi bi-camera-fill"></i> Adicionar Foto
+                                    </button>
+                                    <div id="photoPreview" class="photo-preview" style="display: none;">
+                                        <img id="previewImage" src="" alt="Preview">
+                                        <button type="button" class="remove-photo" onclick="removePhoto()"><i class="bi bi-x-circle-fill"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="post-actions">
+                                    <span class="character-count">0/500</span>
+                                    <button type="submit" class="btn btn-primary">Publicar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+
+                    <!-- Seção para visitantes não logados -->
+                    <section class="guest-message-section" id="guestMessageSection" style="display: none;">
+                        <div class="create-post-card">
+                            <h2>Bem-vindo ao NetworkUp!</h2>
+                            <p>Você está navegando como visitante. Para criar postagens e interagir com a comunidade:</p>
+                            <div class="guest-actions">
+                                <a href="/login" class="btn btn-primary">Fazer Login</a>
+                                <a href="/cadastro" class="btn btn-secondary">Criar Conta</a>
                             </div>
                         </div>
-                        
-                        <div class="post-actions">
-                            <span class="character-count">0/500</span>
-                            <button type="submit" class="btn btn-primary">Publicar</button>
+                    </section>
+
+                    <!-- Feed de postagens -->
+                    <section class="feed-section">
+                        <div id="postsContainer" class="posts-container">
+                            <!-- Postagens serão carregadas aqui via JavaScript -->
+                            <div class="loading">
+                                <p>Carregando postagens...</p>
+                            </div>
                         </div>
-                    </form>
+                    </section>
                 </div>
-            </section>
 
-            <!-- Seção para visitantes não logados -->
-            <section class="guest-message-section" id="guestMessageSection" style="display: none;">
-                <div class="create-post-card">
-                    <h2>Bem-vindo ao NetworkUp!</h2>
-                    <p>Você está navegando como visitante. Para criar postagens e interagir com a comunidade:</p>
-                    <div class="guest-actions">
-                        <a href="/login" class="btn btn-primary">Fazer Login</a>
-                        <a href="/cadastro" class="btn btn-secondary">Criar Conta</a>
+                <!-- Sidebar (inspirado no layout da referência) -->
+                <aside class="feed-sidebar" aria-label="Conteúdo lateral">
+                    <div class="side-card topics-card">
+                        <div class="side-card-header">
+                            <h3>Tópicos em alta</h3>
+                            <button class="side-card-action" type="button" aria-label="Avançar">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        <ul class="topics-list">
+                            <li><button type="button" class="topic-pill">#TrabalhoEmEquipe</button></li>
+                            <li><button type="button" class="topic-pill">#NovasIdeias</button></li>
+                            <li><button type="button" class="topic-pill">#Tecnologia</button></li>
+                            <li><button type="button" class="topic-pill">#Eventos</button></li>
+                        </ul>
                     </div>
-                </div>
-            </section>
 
-            <!-- Feed de postagens -->
-            <section class="feed-section">
-                <div id="postsContainer" class="posts-container">
-                    <!-- Postagens serão carregadas aqui via JavaScript -->
-                    <div class="loading">
-                        <p>Carregando postagens...</p>
+                    <div class="side-card friends-card">
+                        <div class="side-card-header">
+                            <h3>Sugestões de amigos</h3>
+                            <a class="side-card-link" href="/user-profile">Ver tudo</a>
+                        </div>
+                        <div id="friendsLoading" class="side-loading">Carregando sugestões...</div>
+                        <div id="friendsEmpty" class="side-empty" style="display: none;">Sem sugestões no momento</div>
+                        <div id="friendsList" class="friends-list" aria-live="polite"></div>
                     </div>
-                </div>
-            </section>
+                </aside>
+            </div>
         </div>
     </main>
 

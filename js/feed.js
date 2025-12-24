@@ -37,12 +37,100 @@ document.addEventListener('DOMContentLoaded', function() {
     setupUserInterface();
     setupPostForm();
     setupUserMenu();
+
+    // Carregar sugestões de usuários (somente cadastrados via API)
+    loadFriendSuggestions();
     
     // Carregar feed
     loadFeed();
     
     console.log(' Feed inicializado!');
 });
+
+// Carregar sugestões de usuários cadastrados (sidebar)
+async function loadFriendSuggestions() {
+    const friendsList = document.getElementById('friendsList');
+    const friendsLoading = document.getElementById('friendsLoading');
+    const friendsEmpty = document.getElementById('friendsEmpty');
+
+    if (!friendsList) return;
+
+    const setLoading = (isLoading) => {
+        if (friendsLoading) friendsLoading.style.display = isLoading ? 'block' : 'none';
+    };
+
+    const setEmpty = (isEmpty) => {
+        if (friendsEmpty) friendsEmpty.style.display = isEmpty ? 'block' : 'none';
+    };
+
+    try {
+        setLoading(true);
+        setEmpty(false);
+        friendsList.innerHTML = '';
+
+        // A rota /users já é usada no painel admin e retorna somente usuários cadastrados
+        const response = await fetch(`${API_BASE_URL}/users`);
+        const data = await response.json();
+
+        if (!data || !data.success) {
+            // Backend ainda não preparado: não mostrar pessoas fake
+            setLoading(false);
+            setEmpty(true);
+            return;
+        }
+
+        const users = Array.isArray(data.data) ? data.data : [];
+
+        const filtered = users
+            .filter(u => u && u.id)
+            .filter(u => !currentUser || String(u.id) !== String(currentUser.id))
+            .filter(u => (u.status || '').toLowerCase() !== 'banido');
+
+        // Randomizar e pegar poucos itens (visual semelhante à referência)
+        const shuffled = filtered
+            .map(u => ({ u, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ u }) => u);
+
+        const suggestions = shuffled.slice(0, 6);
+
+        setLoading(false);
+
+        if (suggestions.length === 0) {
+            setEmpty(true);
+            return;
+        }
+
+        setEmpty(false);
+        friendsList.innerHTML = suggestions.map(u => renderFriendSuggestion(u)).join('');
+    } catch (error) {
+        console.error('Erro ao carregar sugestões de amigos:', error);
+        // Silencioso: não exibir pessoas inexistentes
+        if (friendsList) friendsList.innerHTML = '';
+        setLoading(false);
+        setEmpty(true);
+    }
+}
+
+function renderFriendSuggestion(user) {
+    const nome = (user.nome || 'Usuário').toString();
+    const iniciais = nome.trim() ? nome.trim().charAt(0).toUpperCase() : 'U';
+    const foto = user.foto_perfil_url || user.foto_perfil || '';
+
+    const avatarHtml = foto
+        ? `<img class="friend-avatar-img" src="${foto}" alt="Foto de ${escapeHtml(nome)}" onerror="this.remove();" />`
+        : '';
+
+    return `
+        <button class="friend-item" type="button" onclick="openUserProfile(${user.id})" title="Ver perfil">
+            <div class="friend-avatar" aria-hidden="true">${escapeHtml(iniciais)}${avatarHtml}</div>
+            <div class="friend-meta">
+                <div class="friend-name">${escapeHtml(nome)}</div>
+                <div class="friend-sub">Ver perfil</div>
+            </div>
+        </button>
+    `;
+}
 
 // Configurar interface do usuário
 function setupUserInterface() {
@@ -646,7 +734,7 @@ function showToast(message, type = 'info') {
     }
     
     toast.style.cssText = `
-        background: ${type === 'success' ? '#A7C0BE' : type === 'error' ? '#dc2626' : '#4D6772'};
+        background: ${type === 'success' ? 'var(--toast-success)' : type === 'error' ? 'var(--toast-error)' : 'var(--toast-info)'};
         color: white;
         padding: 12px 24px;
         border-radius: 8px;

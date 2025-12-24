@@ -270,9 +270,9 @@ function showError(message) {
             <h3>Erro</h3>
             <p>${message}</p>
             <button onclick="window.location.href='/feed'" style="
-                background: #A7C0BE;
-                color: #4D6772;
-                border: none;
+                background: var(--nu-accent-2);
+                color: #062039;
+                border: 1px solid var(--nu-border);
                 padding: 0.5rem 1rem;
                 border-radius: 8px;
                 cursor: pointer;
@@ -390,7 +390,7 @@ function showToast(message, type = 'info') {
     
     // Estilos do toast
     toast.style.cssText = `
-        background: ${type === 'success' ? '#A7C0BE' : type === 'error' ? '#dc2626' : '#4D6772'};
+        background: ${type === 'success' ? 'var(--toast-success)' : type === 'error' ? 'var(--toast-error)' : 'var(--toast-info)'};
         color: white;
         padding: 12px 24px;
         border-radius: 8px;

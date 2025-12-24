@@ -1,0 +1,136 @@
+/* Global Theme Override (Azul - inspirado no mock) */
+:root {
+  --nu-bg-1: #061a2f;
+  --nu-bg-2: #0a2a48;
+  --nu-surface: rgba(255, 255, 255, 0.08);
+  --nu-surface-2: rgba(255, 255, 255, 0.05);
+  --nu-border: rgba(255, 255, 255, 0.14);
+  --nu-text: #e6eef8;
+  --nu-muted: rgba(230, 238, 248, 0.70);
+  --nu-accent: #7fb6e6;
+  --nu-accent-2: #9ad0ff;
+
+  --toast-success: #7fb6e6;
+  --toast-info: #0f3e6a;
+  --toast-error: #dc2626;
+  --toast-text: #ffffff;
+}
+
+body {
+  background: linear-gradient(135deg, var(--nu-bg-1) 0%, var(--nu-bg-2) 100%) !important;
+  color: var(--nu-text) !important;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(154, 208, 255, 0.14) 0%, transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(127, 182, 230, 0.12) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Header glass */
+.main-header {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-bottom: 1px solid var(--nu-border) !important;
+}
+
+.logo h1 {
+  background: linear-gradient(135deg, var(--nu-accent-2), var(--nu-text)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Cards / surfaces */
+.create-post-card,
+.post-card,
+.chat-container,
+.chat-card,
+.home-content,
+.profile-card,
+.user-profile-card,
+.admin-card,
+.side-card {
+  background: var(--nu-surface) !important;
+  border: 1px solid var(--nu-border) !important;
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+  color: var(--nu-text) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--nu-muted) !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--nu-accent-2), var(--nu-accent)) !important;
+  color: #062039 !important;
+}
+
+.btn-secondary {
+  border-color: var(--nu-accent) !important;
+  color: var(--nu-accent-2) !important;
+}
+
+.nav-btn {
+  background: rgba(127, 182, 230, 0.16) !important;
+}
+
+.nav-btn.logout {
+  background: rgba(220, 38, 38, 0.18) !important;
+}
+
+/* Muted text */
+.welcome-text,
+#headerUserEmail,
+.character-count,
+.post-time,
+.comment-time,
+.loading,
+.loading-msg,
+.side-loading,
+.side-empty {
+  color: var(--nu-muted) !important;
+}
+
+/* Chat variables override (loaded after chat.css) */
+:root {
+  --primary-color: #0f3e6a;
+  --secondary-color: var(--nu-accent);
+  --accent-color: var(--nu-accent);
+  --text-color: var(--nu-text);
+  --light-text: var(--nu-muted);
+  --border-color: var(--nu-border);
+  --hover-color: rgba(127, 182, 230, 0.18);
+}
+
+/* Toast palette consistency (some pages style via CSS, others inline) */
+.toast {
+  border: 1px solid var(--nu-border) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+.toast.info {
+  background: var(--toast-info) !important;
+  color: var(--toast-text) !important;
+}
+
+.toast.success {
+  background: var(--toast-success) !important;
+  color: var(--toast-text) !important;
+}
+
+.toast.error {
+  background: var(--toast-error) !important;
+  color: var(--toast-text) !important;
+}

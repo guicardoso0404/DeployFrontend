@@ -471,7 +471,7 @@ function showToast(message, type = 'info') {
     }
     
     toast.style.cssText = `
-        background: ${type === 'success' ? '#A7C0BE' : type === 'error' ? '#dc2626' : '#4D6772'};
+        background: ${type === 'success' ? 'var(--toast-success)' : type === 'error' ? 'var(--toast-error)' : 'var(--toast-info)'};
         color: white;
         padding: 12px 24px;
         border-radius: 8px;
@@ -629,7 +629,7 @@ function showToast(message, type = 'info') {
     toast.textContent = message;
     
     toast.style.cssText = `
-        background: ${type === 'success' ? '#A7C0BE' : type === 'error' ? '#dc2626' : '#4D6772'};
+        background: ${type === 'success' ? 'var(--toast-success)' : type === 'error' ? 'var(--toast-error)' : 'var(--toast-info)'};
         color: white;
         padding: 12px 24px;
         border-radius: 8px;
