@@ -411,7 +411,9 @@ async function loadFeed() {
     postsContainer.innerHTML = '<div class="loading"><p>Carregando postagens...</p></div>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/posts/feed`);
+        const response = await fetch(`${API_BASE_URL}/posts/feed`, {
+            cache: 'no-cache'
+        });
         const data = await response.json();
 
         if (data.success) {
