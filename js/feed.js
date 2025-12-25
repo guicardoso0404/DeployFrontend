@@ -1,11 +1,72 @@
-// 🦟👀
+// FEED CORRIGIDO (avatar Google/LinkedIn)
+// - Só usa URL real (http/https/data/blob) como foto.
+// - Não promove public_id (Cloudinary) para foto_perfil_url.
+// - Mantém o restante do comportamento original.
+
 // Configurações da API
 const API_BASE_URL = 'https://deploy-back-end-chi.vercel.app/api';
 let currentUser = null;
 
+function isLikelyUrl(value) {
+    if (typeof value !== 'string') return false;
+    const v = value.trim();
+    if (!v) return false;
+    return (
+        v.startsWith('https://') ||
+        v.startsWith('http://') ||
+        v.startsWith('//') ||
+        v.startsWith('data:image/') ||
+        v.startsWith('blob:')
+    );
+}
+
+function normalizeUrl(value) {
+    if (typeof value !== 'string') return '';
+    const v = value.trim();
+    if (!v) return '';
+
+    if (v.startsWith('http://')) return `https://${v.slice('http://'.length)}`;
+    if (v.startsWith('//')) return `https:${v}`;
+    return v;
+}
+
+function pickPhotoUrl(obj) {
+    if (!obj) return '';
+
+    // Ordem: primeiro campos já “url”, depois equivalentes de providers.
+    const candidates = [
+        obj.foto_perfil_url,
+        obj.foto_perfil,
+        obj.foto_perfilUrl,
+        obj.fotoPerfil,
+        obj.avatar_url,
+        obj.avatarUrl,
+        obj.avatar,
+        obj.picture,
+        obj.pictureUrl,
+        obj.profile_picture,
+        obj.profilePicture,
+        obj.photo,
+        obj.photoUrl,
+        obj.imagem_url,
+        obj.imagemUrl,
+        obj.imagem
+    ];
+
+    for (const c of candidates) {
+        if (typeof c !== 'string') continue;
+        const trimmed = c.trim();
+        if (!trimmed) continue;
+        if (!isLikelyUrl(trimmed)) continue;
+        return normalizeUrl(trimmed);
+    }
+
+    return '';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(' Feed carregando...');
-    
+    console.log('Feed carregando...');
+
     // Verificar se veio do login OAuth (Google/LinkedIn)
     const urlParams = new URLSearchParams(window.location.search);
     const authData = urlParams.get('auth');
@@ -15,33 +76,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const persistUsuarioOnly = (usuario) => {
                 if (!usuario) return;
 
-                // Normalizar foto para os campos esperados no frontend
-                const rawPhoto = (
-                    usuario.foto_perfil_url ||
-                    usuario.foto_perfil ||
-                    usuario.foto_perfilUrl ||
-                    usuario.fotoPerfil ||
-                    usuario.avatar_url ||
-                    usuario.avatarUrl ||
-                    usuario.avatar ||
-                    usuario.picture ||
-                    usuario.pictureUrl ||
-                    usuario.profile_picture ||
-                    usuario.profilePicture ||
-                    usuario.photo ||
-                    usuario.photoUrl ||
-                    usuario.imagem_url ||
-                    usuario.imagemUrl ||
-                    usuario.imagem ||
-                    ''
-                );
-                const photo = typeof rawPhoto === 'string' ? rawPhoto.trim() : '';
-                if (photo) {
-                    const fixed = photo.startsWith('http://')
-                        ? `https://${photo.slice('http://'.length)}`
-                        : (photo.startsWith('//') ? `https:${photo}` : photo);
-                    if (!usuario.foto_perfil) usuario.foto_perfil = fixed;
-                    if (!usuario.foto_perfil_url) usuario.foto_perfil_url = fixed;
+                // Só aceita URL real (Google/LinkedIn normalmente vêm aqui)
+                const photoUrl = pickPhotoUrl(usuario);
+                if (photoUrl) {
+                    // Mantém compatibilidade: preenche os dois campos com URL
+                    usuario.foto_perfil = photoUrl;
+                    usuario.foto_perfil_url = photoUrl;
+                } else {
+                    // Se não for URL, não inventa foto_perfil_url.
+                    // Isso evita <img src="public_id"> quebrando e gerando warning.
+                    if (usuario.foto_perfil_url && !isLikelyUrl(usuario.foto_perfil_url)) {
+                        delete usuario.foto_perfil_url;
+                    }
                 }
 
                 localStorage.setItem('currentUser', JSON.stringify(usuario));
@@ -58,54 +104,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userId = usuario?.id;
 
                 if (payload?.success && usuario) {
-                    // Se vier token, preferir fluxo novo (salva token + normaliza usuário)
                     if (accessToken && userId && window.Auth?.setAuth) {
-                        window.Auth.setAuth({ accessToken, userId, usuario });
+                        // Importante: setAuth precisa receber o usuário já normalizado
+                        const cloned = { ...usuario };
+                        const photoUrl = pickPhotoUrl(cloned);
+                        if (photoUrl) {
+                            cloned.foto_perfil = photoUrl;
+                            cloned.foto_perfil_url = photoUrl;
+                        } else if (cloned.foto_perfil_url && !isLikelyUrl(cloned.foto_perfil_url)) {
+                            delete cloned.foto_perfil_url;
+                        }
+
+                        window.Auth.setAuth({ accessToken, userId, usuario: cloned });
                     } else {
-                        // Alguns redirects enviam só o usuário (sem token)
                         persistUsuarioOnly(usuario);
                     }
 
                     window.history.replaceState({}, document.title, window.location.pathname);
-                    console.log(' Login OAuth realizado:', usuario);
+                    console.log('Login OAuth realizado:', usuario);
                 } else {
-                    console.warn(' OAuth recebido, mas payload inválido:', payload);
+                    console.warn('OAuth recebido, mas payload inválido:', payload);
                 }
             } else {
-                // Fallback (legado): mantém compatibilidade caso o helper não esteja carregado.
+                // Fallback (legado)
                 const userData = JSON.parse(atob(authData));
                 if (userData.success && userData.data?.usuario) {
                     persistUsuarioOnly(userData.data.usuario);
                     window.history.replaceState({}, document.title, window.location.pathname);
-                    console.log(' Login OAuth realizado (fallback):', userData.data.usuario);
+                    console.log('Login OAuth realizado (fallback):', userData.data.usuario);
                 }
             }
         } catch (e) {
-            console.error(' Erro ao processar dados do OAuth:', e);
+            console.error('Erro ao processar dados do OAuth:', e);
         }
     }
-    
+
     // Verificar se usuário está logado (opcional)
     currentUser = getCurrentUser();
-    
+
     if (currentUser) {
-        console.log(' Usuário logado detectado:', currentUser.nome, currentUser.email);
+        console.log('Usuário logado detectado:', currentUser.nome, currentUser.email);
     } else {
         console.log('Usuário não logado - modo visitante');
     }
-    
+
     // Configurar interface
     setupUserInterface();
     setupPostForm();
     setupUserMenu();
 
-    // Carregar sugestões de usuários (somente cadastrados via API)
     loadFriendSuggestions();
-    
-    // Carregar feed
     loadFeed();
-    
-    console.log(' Feed inicializado!');
+
+    console.log('Feed inicializado!');
 });
 
 // Carregar sugestões de usuários cadastrados (sidebar)
@@ -129,12 +180,10 @@ async function loadFriendSuggestions() {
         setEmpty(false);
         friendsList.innerHTML = '';
 
-        // A rota /users já é usada no painel admin e retorna somente usuários cadastrados
         const response = await fetch(`${API_BASE_URL}/users`);
         const data = await response.json();
 
         if (!data || !data.success) {
-            // Backend ainda não preparado: não mostrar pessoas fake
             setLoading(false);
             setEmpty(true);
             return;
@@ -147,7 +196,6 @@ async function loadFriendSuggestions() {
             .filter(u => !currentUser || String(u.id) !== String(currentUser.id))
             .filter(u => (u.status || '').toLowerCase() !== 'banido');
 
-        // Randomizar e pegar poucos itens (visual semelhante à referência)
         const shuffled = filtered
             .map(u => ({ u, sort: Math.random() }))
             .sort((a, b) => a.sort - b.sort)
@@ -166,7 +214,6 @@ async function loadFriendSuggestions() {
         friendsList.innerHTML = suggestions.map(u => renderFriendSuggestion(u)).join('');
     } catch (error) {
         console.error('Erro ao carregar sugestões de amigos:', error);
-        // Silencioso: não exibir pessoas inexistentes
         if (friendsList) friendsList.innerHTML = '';
         setLoading(false);
         setEmpty(true);
@@ -176,7 +223,7 @@ async function loadFriendSuggestions() {
 function renderFriendSuggestion(user) {
     const nome = (user.nome || 'Usuário').toString();
     const iniciais = nome.trim() ? nome.trim().charAt(0).toUpperCase() : 'U';
-    const foto = user.foto_perfil_url || user.foto_perfil || '';
+    const foto = pickPhotoUrl(user);
 
     const avatarHtml = foto
         ? `<img class="friend-avatar-img" src="${foto}" alt="Foto de ${escapeHtml(nome)}" onerror="this.remove();" />`
@@ -193,7 +240,6 @@ function renderFriendSuggestion(user) {
     `;
 }
 
-// Configurar interface do usuário
 function setupUserInterface() {
     const loggedUserArea = document.getElementById('loggedUserArea');
     const guestUserArea = document.getElementById('guestUserArea');
@@ -201,70 +247,55 @@ function setupUserInterface() {
     const headerUserEmail = document.getElementById('headerUserEmail');
     const createPostSection = document.getElementById('createPostSection');
     const guestMessageSection = document.getElementById('guestMessageSection');
-    
+
     if (currentUser) {
-        console.log(' Configurando interface para usuário logado:', currentUser.nome);
-        
-        // Mostrar área do usuário logado
         if (loggedUserArea) loggedUserArea.style.display = 'block';
         if (guestUserArea) guestUserArea.style.display = 'none';
-        
-        // Atualizar informações do usuário
+
         if (headerUserName) headerUserName.textContent = currentUser.nome;
         if (headerUserEmail) headerUserEmail.textContent = currentUser.email;
-        
-        // Atualizar foto de perfil no header
+
         const headerUserAvatar = document.getElementById('headerUserAvatar');
         if (headerUserAvatar) {
-            const fotoUrl = currentUser.foto_perfil_url || currentUser.foto_perfil;
-            console.log(' Tentando carregar foto de perfil:', fotoUrl);
+            const fotoUrl = pickPhotoUrl(currentUser);
+            console.log('Tentando carregar foto de perfil:', fotoUrl || '(nenhuma)');
+
             if (fotoUrl) {
                 headerUserAvatar.src = fotoUrl;
                 headerUserAvatar.alt = `Foto de ${currentUser.nome}`;
-                // Adicionar fallback se a imagem falhar ao carregar
                 headerUserAvatar.onerror = function() {
-                    console.warn(' Erro ao carregar foto de perfil, usando padrão');
+                    console.warn('Erro ao carregar foto de perfil, usando padrão');
                     this.src = '../assets/imagens/Logo.png';
-                    this.onerror = null; // Prevenir loop infinito
+                    this.onerror = null;
                 };
             } else {
-                // Se não tiver foto, usar logo padrão
-                console.log(' Nenhuma foto de perfil encontrada, usando padrão');
                 headerUserAvatar.src = '../assets/imagens/Logo.png';
                 headerUserAvatar.alt = 'Avatar padrão';
             }
         }
-        
-        // Mostrar seção de criar post para usuários logados
+
         if (createPostSection) createPostSection.style.display = 'block';
         if (guestMessageSection) guestMessageSection.style.display = 'none';
     } else {
-        console.log(' Configurando interface para visitante');
-        
-        // Mostrar área do visitante
         if (loggedUserArea) loggedUserArea.style.display = 'none';
         if (guestUserArea) guestUserArea.style.display = 'block';
-        
-        // Mostrar mensagem para visitantes
+
         if (createPostSection) createPostSection.style.display = 'none';
         if (guestMessageSection) guestMessageSection.style.display = 'block';
     }
 }
 
-// Configurar formulário de postagem
 function setupPostForm() {
     const createPostForm = document.getElementById('createPostForm');
     if (createPostForm) {
         createPostForm.addEventListener('submit', handleCreatePost);
-        
-        // Contador de caracteres
+
         const textarea = document.getElementById('postContent');
         if (textarea) {
             textarea.addEventListener('input', updateCharacterCount);
             updateCharacterCount();
         }
-        
-        // Upload de foto
+
         const photoInput = document.getElementById('photoInput');
         if (photoInput) {
             photoInput.addEventListener('change', handlePhotoSelect);
@@ -272,149 +303,120 @@ function setupPostForm() {
     }
 }
 
-// Configurar menu do usuário
 function setupUserMenu() {
     const profileBtn = document.getElementById('profileBtn');
     const logoutBtn = document.getElementById('logoutBtn');
-    
-    // Configurar botão de perfil
+
     if (profileBtn) {
         profileBtn.addEventListener('click', function() {
-            console.log(' Redirecionando para perfil...');
             window.location.href = '/profile';
         });
     }
-    
-    // Configurar botão de chat
+
     const chatBtn = document.getElementById('chatBtn');
     if (chatBtn) {
         chatBtn.addEventListener('click', function() {
-            console.log(' Redirecionando para chat...');
             window.location.href = '/chat';
         });
     }
-    
-    // Configurar botão de admin (apenas para guilherme@networkup.com.br)
+
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn && currentUser && currentUser.email === 'guilherme@networkup.com.br') {
         adminBtn.style.display = 'inline-flex';
         adminBtn.addEventListener('click', function() {
-            console.log(' Redirecionando para painel admin...');
             window.location.href = '/admin';
         });
     }
-    
-    // Configurar botão de logout
+
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
-            console.log(' Fazendo logout...');
-            
-            // Limpar dados do usuário
             if (window.Auth?.clearAuth) {
                 window.Auth.clearAuth();
             } else {
                 localStorage.removeItem('currentUser');
             }
             sessionStorage.clear();
-            
-            // Mostrar mensagem e redirecionar
+
             showToast('Logout realizado com sucesso!', 'success');
-            
+
             setTimeout(() => {
                 window.location.href = '/home';
             }, 1000);
         });
     }
 }
-    // user menu interactions are handled inside this function using
-    // elements retrieved locally (profileBtn, chatBtn, logoutBtn).
-    // Removed stray/global event handlers that referenced undefined
-    // variables (userMenuBtn, userDropdown, profileBtn) to avoid
-    // runtime ReferenceError when the script loads.
 
-// Criar postagem
 async function handleCreatePost(event) {
     event.preventDefault();
-    
+
     const form = event.target;
     const content = form.content.value.trim();
     const photoInput = document.getElementById('photoInput');
     const submitButton = form.querySelector('button[type="submit"]');
-    
+
     if (!content && !photoInput.files[0]) {
         showToast('Digite algo ou adicione uma foto para postar', 'error');
         return;
     }
-    
+
     if (!currentUser) {
         showToast('Você precisa estar logado para postar', 'error');
         return;
     }
-    
+
     setButtonLoading(submitButton, true);
-    
+
     try {
-        console.log(' Criando postagem...');
-        
-        // Preparar FormData para envio de arquivo
         const formData = new FormData();
         formData.append('conteudo', content);
-        
+
         if (photoInput.files[0]) {
             formData.append('photo', photoInput.files[0]);
         }
-        
+
         const doAuthFetch = window.Auth?.authFetch;
         const response = doAuthFetch
             ? await doAuthFetch(`${API_BASE_URL}/posts/postar`, {
                 method: 'POST',
-                body: formData // Não definir Content-Type para FormData
+                body: formData
             })
             : await fetch(`${API_BASE_URL}/posts/postar`, {
                 method: 'POST',
                 body: formData
             });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            console.log(' Postagem criada:', data.data.id);
             showToast('Postagem criada com sucesso!', 'success');
             form.reset();
-            removePhoto(); // Limpar preview da foto
+            removePhoto();
             updateCharacterCount();
-            loadFeed(); // Recarregar feed
+            loadFeed();
         } else {
-            console.log(' Erro ao criar postagem:', data.message);
             showToast(data.message || 'Erro ao criar postagem', 'error');
         }
     } catch (error) {
-        console.error(' Erro ao criar postagem:', error);
+        console.error('Erro ao criar postagem:', error);
         showToast('Erro de conexão. Verifique se o servidor está rodando.', 'error');
     } finally {
         setButtonLoading(submitButton, false);
     }
 }
 
-// Carregar feed
 async function loadFeed() {
     const postsContainer = document.getElementById('postsContainer');
     if (!postsContainer) return;
-    
-    // Mostrar loading
+
     postsContainer.innerHTML = '<div class="loading"><p>Carregando postagens...</p></div>';
-    
+
     try {
-        console.log(' Carregando feed...');
-        
         const response = await fetch(`${API_BASE_URL}/posts/feed`);
         const data = await response.json();
-        
+
         if (data.success) {
-            console.log(' Feed carregado:', data.data.length, 'postagens');
             renderPosts(data.data);
         } else {
-            console.log(' Erro ao carregar feed:', data.message);
             postsContainer.innerHTML = '<div class="loading"><p>Erro ao carregar postagens</p></div>';
         }
     } catch (error) {
@@ -423,10 +425,9 @@ async function loadFeed() {
     }
 }
 
-// Renderizar postagens
 function renderPosts(posts) {
     const postsContainer = document.getElementById('postsContainer');
-    
+
     if (posts.length === 0) {
         postsContainer.innerHTML = `
             <div class="loading">
@@ -436,18 +437,21 @@ function renderPosts(posts) {
         `;
         return;
     }
-    
-    postsContainer.innerHTML = posts.map(post => `
+
+    postsContainer.innerHTML = posts.map(post => {
+        const postAvatarUrl = pickPhotoUrl({ foto_perfil_url: post.foto_perfil_url, foto_perfil: post.foto_perfil });
+
+        return `
         <article class="post-card" data-post-id="${post.id}">
             <div class="post-header">
                 <div class="user-avatar" onclick="openUserProfile(${post.usuario_id})">
-                    ${(post.foto_perfil_url || post.foto_perfil) ? 
-                        `<img src="${post.foto_perfil_url || post.foto_perfil}" alt="Foto de ${post.usuario_nome}" />` : 
-                        `<div class="avatar-placeholder">${post.usuario_nome ? post.usuario_nome.charAt(0).toUpperCase() : 'U'}</div>`
+                    ${postAvatarUrl ?
+                        `<img src="${postAvatarUrl}" alt="Foto de ${escapeHtml(post.usuario_nome || 'Usuário')}" onerror="this.remove();" />` :
+                        `<div class="avatar-placeholder">${post.usuario_nome ? escapeHtml(post.usuario_nome.charAt(0).toUpperCase()) : 'U'}</div>`
                     }
                 </div>
                 <div class="user-info">
-                    <h3 onclick="openUserProfile(${post.usuario_id})" class="clickable-username">${post.usuario_nome || 'Usuário'}</h3>
+                    <h3 onclick="openUserProfile(${post.usuario_id})" class="clickable-username">${escapeHtml(post.usuario_nome || 'Usuário')}</h3>
                     <div class="post-time">${formatDate(post.created_at)}</div>
                 </div>
                 ${canDeletePost(post) ? `
@@ -458,17 +462,17 @@ function renderPosts(posts) {
                     </div>
                 ` : ''}
             </div>
-            
+
             <div class="post-content">
                 ${escapeHtml(post.conteudo)}
             </div>
-            
+
             ${post.imagem_url ? `
                 <div class="post-image">
                     <img src="${post.imagem_url}" alt="Imagem do post" onclick="openImageModal('${post.imagem_url}')" loading="lazy">
                 </div>
             ` : ''}
-            
+
             <div class="post-actions">
                 <button class="action-btn like-btn" onclick="toggleLike(${post.id})" ${!currentUser ? 'disabled title="Faça login para curtir"' : ''}>
                     <i class="bi bi-heart-fill"></i> <span>${post.curtidas || 0}</span>
@@ -480,10 +484,10 @@ function renderPosts(posts) {
                     <i class="bi bi-share-fill"></i> Compartilhar
                 </button>
             </div>
-            
+
             <div class="comments-section" id="comments-${post.id}" style="display: none;">
                 ${renderComments(post.comentarios_lista || [])}
-                
+
                 ${currentUser ? `
                     <form class="comment-form" onsubmit="handleAddComment(event, ${post.id})">
                         <input type="text" placeholder="Adicione um comentário..." required>
@@ -496,47 +500,47 @@ function renderPosts(posts) {
                 `}
             </div>
         </article>
-    `).join('');
-    
-    // Adicionar modal de imagem se não existir
+        `;
+    }).join('');
+
     if (!document.getElementById('imageModal')) {
         addImageModal();
     }
 }
 
-// Renderizar comentários
 function renderComments(comments) {
     if (!comments || comments.length === 0) {
         return '<p class="no-comments">Nenhum comentário ainda</p>';
     }
-    
-    return comments.map(comment => `
+
+    return comments.map(comment => {
+        const commentAvatarUrl = pickPhotoUrl({ foto_perfil_url: comment.foto_perfil_url, foto_perfil: comment.foto_perfil });
+
+        return `
         <div class="comment">
             <div class="comment-avatar" onclick="openUserProfile(${comment.usuario_id})">
-                ${(comment.foto_perfil_url || comment.foto_perfil) ? 
-                    `<img src="${comment.foto_perfil_url || comment.foto_perfil}" alt="Foto de ${comment.usuario_nome}" />` : 
-                    `<div class="avatar-placeholder">${comment.usuario_nome ? comment.usuario_nome.charAt(0).toUpperCase() : 'U'}</div>`
+                ${commentAvatarUrl ?
+                    `<img src="${commentAvatarUrl}" alt="Foto de ${escapeHtml(comment.usuario_nome || 'Usuário')}" onerror="this.remove();" />` :
+                    `<div class="avatar-placeholder">${comment.usuario_nome ? escapeHtml(comment.usuario_nome.charAt(0).toUpperCase()) : 'U'}</div>`
                 }
             </div>
             <div class="comment-content">
-                <div class="comment-author" onclick="openUserProfile(${comment.usuario_id})">${comment.usuario_nome || 'Usuário'}</div>
+                <div class="comment-author" onclick="openUserProfile(${comment.usuario_id})">${escapeHtml(comment.usuario_nome || 'Usuário')}</div>
                 <div class="comment-text">${escapeHtml(comment.conteudo)}</div>
                 <div class="comment-time">${formatDate(comment.created_at)}</div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-// Curtir postagem
 async function toggleLike(postId) {
     if (!currentUser) {
         showToast('Você precisa estar logado para curtir', 'error');
         return;
     }
-    
+
     try {
-        console.log(' Curtindo postagem:', postId);
-        
         if (!window.Auth?.authFetch) {
             showToast('Atualize a página (Auth helper não carregou).', 'error');
             return;
@@ -544,38 +548,31 @@ async function toggleLike(postId) {
 
         const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/curtir`, {
             method: 'POST',
-            body: JSON.stringify({
-                postagem_id: postId
-            })
+            body: JSON.stringify({ postagem_id: postId })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            console.log(' Curtida:', data.data.acao);
-            
-            // Atualizar interface
             const likeBtn = document.querySelector(`[data-post-id="${postId}"] .like-btn`);
             const likeCount = likeBtn.querySelector('span');
-            
+
             if (data.data.acao === 'curtiu') {
                 likeBtn.classList.add('liked');
             } else {
                 likeBtn.classList.remove('liked');
             }
-            
+
             likeCount.textContent = data.data.total_curtidas;
         } else {
-            console.log(' Erro ao curtir:', data.message);
             showToast(data.message || 'Erro ao curtir postagem', 'error');
         }
     } catch (error) {
-        console.error(' Erro ao curtir postagem:', error);
+        console.error('Erro ao curtir postagem:', error);
         showToast('Erro de conexão', 'error');
     }
 }
 
-// Alternar comentários
 function toggleComments(postId) {
     const commentsSection = document.getElementById(`comments-${postId}`);
     if (commentsSection) {
@@ -583,27 +580,24 @@ function toggleComments(postId) {
     }
 }
 
-// Adicionar comentário
 async function handleAddComment(event, postId) {
     event.preventDefault();
-    
+
     if (!currentUser) {
         showToast('Você precisa estar logado para comentar', 'error');
         return;
     }
-    
+
     const form = event.target;
     const input = form.querySelector('input');
     const content = input.value.trim();
-    
+
     if (!content) {
         showToast('Digite um comentário', 'error');
         return;
     }
-    
+
     try {
-        console.log(' Adicionando comentário na postagem:', postId);
-        
         if (!window.Auth?.authFetch) {
             showToast('Atualize a página (Auth helper não carregou).', 'error');
             return;
@@ -611,30 +605,24 @@ async function handleAddComment(event, postId) {
 
         const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/comentar`, {
             method: 'POST',
-            body: JSON.stringify({
-                postagem_id: postId,
-                conteudo: content
-            })
+            body: JSON.stringify({ postagem_id: postId, conteudo: content })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            console.log(' Comentário adicionado:', data.data.id);
             form.reset();
-            loadFeed(); // Recarregar feed para mostrar novo comentário
+            loadFeed();
             showToast('Comentário adicionado!', 'success');
         } else {
-            console.log(' Erro ao comentar:', data.message);
             showToast(data.message || 'Erro ao adicionar comentário', 'error');
         }
     } catch (error) {
-        console.error(' Erro ao adicionar comentário:', error);
+        console.error('Erro ao adicionar comentário:', error);
         showToast('Erro de conexão', 'error');
     }
 }
 
-// Compartilhar postagem
 function sharePost(postId) {
     if (navigator.share) {
         navigator.share({
@@ -644,37 +632,27 @@ function sharePost(postId) {
         });
     } else {
         showToast('Link copiado para área de transferência!', 'success');
-        // Aqui você poderia implementar cópia para clipboard
     }
 }
 
-// Verificar se pode deletar post
 function canDeletePost(post) {
     if (!currentUser) return false;
-    
-    // É o criador do post
     const isOwner = post.usuario_id === currentUser.id;
-    
-    // É administrador (verificar por email específico)
     const isAdmin = currentUser.email === 'admin@networkup.com' || currentUser.email === 'teste@teste.com';
-    
     return isOwner || isAdmin;
 }
 
-// Deletar postagem
 async function deletePost(postId) {
     if (!currentUser) {
         showToast('Você precisa estar logado para deletar posts', 'error');
         return;
     }
-    
+
     if (!confirm('Tem certeza que deseja deletar esta postagem? Esta ação não pode ser desfeita.')) {
         return;
     }
-    
+
     try {
-        console.log(' Deletando postagem:', postId);
-        
         if (!window.Auth?.authFetch) {
             showToast('Atualize a página (Auth helper não carregou).', 'error');
             return;
@@ -683,33 +661,30 @@ async function deletePost(postId) {
         const response = await window.Auth.authFetch(`${API_BASE_URL}/posts/deletar/${postId}`, {
             method: 'DELETE'
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            console.log(' Postagem deletada:', postId);
             showToast('Postagem deletada com sucesso!', 'success');
-            loadFeed(); // Recarregar feed
+            loadFeed();
         } else {
-            console.log(' Erro ao deletar postagem:', data.message);
             showToast(data.message || 'Erro ao deletar postagem', 'error');
         }
     } catch (error) {
-        console.error(' Erro ao deletar postagem:', error);
+        console.error('Erro ao deletar postagem:', error);
         showToast('Erro de conexão', 'error');
     }
 }
 
-// Contador de caracteres
 function updateCharacterCount() {
     const textarea = document.getElementById('postContent');
     const counter = document.querySelector('.character-count');
-    
+
     if (textarea && counter) {
         const count = textarea.value.length;
         const max = textarea.getAttribute('maxlength') || 500;
         counter.textContent = `${count}/${max}`;
-        
+
         if (count > max * 0.9) {
             counter.style.color = '#dc2626';
         } else {
@@ -718,33 +693,13 @@ function updateCharacterCount() {
     }
 }
 
-// Logout
-function handleLogout() {
-    if (confirm('Tem certeza que deseja sair?')) {
-        if (window.Auth?.clearAuth) {
-            window.Auth.clearAuth();
-        } else {
-            localStorage.removeItem('currentUser');
-        }
-        currentUser = null;
-        
-        console.log(' Logout realizado');
-        showToast('Logout realizado com sucesso!', 'success');
-        
-        setTimeout(() => {
-            window.location.href = '/home';
-        }, 1000);
-    }
-}
-
-// Utilitários
 function getCurrentUser() {
     try {
         const userStr = localStorage.getItem('currentUser');
         if (userStr) {
             const user = JSON.parse(userStr);
-            console.log(' Usuário carregado do localStorage:', user.nome);
-            console.log(' Foto de perfil disponível:', user.foto_perfil_url || user.foto_perfil || 'nenhuma');
+            console.log('Usuário carregado do localStorage:', user.nome);
+            console.log('Foto de perfil disponível:', pickPhotoUrl(user) || 'nenhuma');
             return user;
         }
         return null;
@@ -765,17 +720,17 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return 'Agora';
     if (diffInMinutes < 60) return `${diffInMinutes}m`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
     if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}d`;
-    
+
     return date.toLocaleDateString('pt-BR');
 }
 
 function setButtonLoading(button, loading = true) {
-    if (!button) return; // guard: avoid errors when button isn't found
+    if (!button) return;
 
     if (loading) {
         button.classList.add('loading');
@@ -792,7 +747,7 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    
+
     let container = document.getElementById('toastContainer');
     if (!container) {
         container = document.createElement('div');
@@ -806,7 +761,7 @@ function showToast(message, type = 'info') {
         `;
         document.body.appendChild(container);
     }
-    
+
     toast.style.cssText = `
         background: ${type === 'success' ? 'var(--toast-success)' : type === 'error' ? 'var(--toast-error)' : 'var(--toast-info)'};
         color: white;
@@ -820,14 +775,14 @@ function showToast(message, type = 'info') {
         max-width: 300px;
         word-wrap: break-word;
     `;
-    
+
     container.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.style.opacity = '1';
         toast.style.transform = 'translateX(0)';
     }, 100);
-    
+
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(100%)';
@@ -847,48 +802,38 @@ window.sharePost = sharePost;
 window.deletePost = deletePost;
 window.openUserProfile = openUserProfile;
 
-// Função para abrir perfil do usuário
 function openUserProfile(userId) {
     if (!userId) {
         console.error('ID do usuário não fornecido');
         return;
     }
-    
-    console.log(' Abrindo perfil do usuário:', userId);
-    
-    // Verificar se é o próprio usuário
+
     if (currentUser && currentUser.id == userId) {
-        // Redirecionar para página de perfil próprio
         window.location.href = '/profile';
     } else {
-        // Redirecionar para página de perfil de outro usuário
         window.location.href = `/user-profile?user=${userId}`;
     }
 }
 
-// Funções para manipulação de fotos
 function handlePhotoSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
-    // Validar tipo de arquivo
+
     if (!file.type.startsWith('image/')) {
         showToast('Por favor, selecione apenas arquivos de imagem', 'error');
         return;
     }
-    
-    // Validar tamanho (máximo 5MB)
+
     if (file.size > 5 * 1024 * 1024) {
         showToast('A imagem deve ter no máximo 5MB', 'error');
         return;
     }
-    
-    // Mostrar preview
+
     const reader = new FileReader();
     reader.onload = function(e) {
         const preview = document.getElementById('photoPreview');
         const previewImage = document.getElementById('previewImage');
-        
+
         previewImage.src = e.target.result;
         preview.style.display = 'block';
     };
@@ -898,7 +843,7 @@ function handlePhotoSelect(event) {
 function removePhoto() {
     const photoInput = document.getElementById('photoInput');
     const preview = document.getElementById('photoPreview');
-    
+
     photoInput.value = '';
     preview.style.display = 'none';
 }
@@ -914,15 +859,13 @@ function addImageModal() {
         </div>
     `;
     document.body.appendChild(modal);
-    
-    // Fechar modal ao clicar fora da imagem
+
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             closeImageModal();
         }
     });
-    
-    // Adicionar evento de teclado para fechar com ESC
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'block') {
             closeImageModal();
@@ -933,7 +876,7 @@ function addImageModal() {
 function openImageModal(imageSrc) {
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
-    
+
     modalImage.src = imageSrc;
     modal.style.display = 'block';
 }
@@ -943,7 +886,6 @@ function closeImageModal() {
     modal.style.display = 'none';
 }
 
-// Expor funções de imagem globalmente1
 window.removePhoto = removePhoto;
 window.openImageModal = openImageModal;
 window.closeImageModal = closeImageModal;
